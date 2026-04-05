@@ -1,4 +1,6 @@
 import path from "node:path";
+import { analyzeRepository } from "./core/engine";
+import { createDefaultRegistry } from "./default-registry";
 import { loadConfig } from "./config";
 
 export function formatHelp(): string {
@@ -9,8 +11,11 @@ export function formatHelp(): string {
     "  bun run src/cli.ts scan [path] [--json]",
     "  bun run src/cli.ts --help",
     "",
-    "Current status:",
-    "  Project scaffolded. Scan engine will land in the next phase.",
+    "Implemented in this phase:",
+    "  - pluggable registry",
+    "  - dependency-aware fact provider scheduler",
+    "  - repository discovery",
+    "  - text and JSON reporters",
   ].join("\n");
 }
 
@@ -30,23 +35,11 @@ export async function run(argv: string[]): Promise<number> {
 
   const rootDir = path.resolve(targetArg);
   const config = await loadConfig(rootDir);
+  const registry = createDefaultRegistry();
+  const result = await analyzeRepository(rootDir, config, registry);
+  const reporter = registry.getReporter(argv.includes("--json") ? "json" : "text");
 
-  const report = {
-    status: "scaffold",
-    rootDir,
-    config,
-    message: "Scan engine not implemented yet. Foundation is ready.",
-  };
-
-  if (argv.includes("--json")) {
-    console.log(JSON.stringify(report, null, 2));
-  } else {
-    console.log("repo-slop-analyzer scaffold");
-    console.log(`root: ${rootDir}`);
-    console.log(`ignore patterns: ${config.ignores.length}`);
-    console.log(report.message);
-  }
-
+  console.log(await reporter.render(result));
   return 0;
 }
 

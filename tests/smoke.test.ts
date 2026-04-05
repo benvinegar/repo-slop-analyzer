@@ -5,7 +5,7 @@ import { formatHelp, run } from "../src/cli";
 describe("project scaffold", () => {
   test("help text mentions scan command", () => {
     expect(formatHelp()).toContain("scan");
-    expect(formatHelp()).toContain("repo-slop-analyzer");
+    expect(formatHelp()).toContain("pluggable registry");
   });
 
   test("loadConfig returns defaults when config file is absent", async () => {
@@ -13,8 +13,8 @@ describe("project scaffold", () => {
     expect(config).toEqual(DEFAULT_CONFIG);
   });
 
-  test("scan command exits successfully in scaffold mode", async () => {
-    const exitCode = await run(["scan", ".", "--json"]);
+  test("scan command exits successfully", async () => {
+    const exitCode = await run(["scan", "."]);
     expect(exitCode).toBe(0);
   });
 });
