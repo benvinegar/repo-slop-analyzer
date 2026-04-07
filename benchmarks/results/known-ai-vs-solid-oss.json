@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "benchmarkSetId": "known-ai-vs-solid-oss",
   "benchmarkSetName": "Known AI repos vs older solid OSS repos",
-  "generatedAt": "2026-04-07T02:52:21.277Z",
+  "generatedAt": "2026-04-07T03:06:44.232Z",
   "analyzerVersion": "0.1.0",
   "configMode": "default",
   "repos": [
@@ -309,6 +309,177 @@
         {
           "path": "lib/platform/persistence/project-task",
           "score": 3,
+          "findingCount": 1
+        }
+      ]
+    },
+    {
+      "id": "openclaw",
+      "repo": "openclaw/openclaw",
+      "cohort": "explicit-ai",
+      "ref": "44cf74717b4507245648a0263f3b0df85aa2a813",
+      "summary": {
+        "fileCount": 10580,
+        "directoryCount": 444,
+        "findingCount": 3136,
+        "repoScore": 10702.207485884483,
+        "physicalLineCount": 1955399,
+        "logicalLineCount": 1037965,
+        "functionCount": 40714,
+        "normalized": {
+          "scorePerFile": 1.0115508020684767,
+          "scorePerKloc": 10.310759501413326,
+          "scorePerFunction": 0.2628630811486094,
+          "findingsPerFile": 0.29640831758034025,
+          "findingsPerKloc": 3.021296479168373,
+          "findingsPerFunction": 0.07702510193053987
+        }
+      },
+      "ruleCounts": {
+        "tests.duplicate-mock-setup": 1003,
+        "defensive.needless-try-catch": 683,
+        "structure.pass-through-wrappers": 624,
+        "structure.barrel-density": 415,
+        "defensive.async-noise": 315,
+        "structure.directory-fanout-hotspot": 70,
+        "structure.over-fragmentation": 26
+      },
+      "topFiles": [
+        {
+          "path": "src/config/io.ts",
+          "score": 17,
+          "findingCount": 3
+        },
+        {
+          "path": "extensions/matrix/src/matrix/sdk.ts",
+          "score": 16,
+          "findingCount": 3
+        },
+        {
+          "path": "extensions/msteams/src/attachments/shared.ts",
+          "score": 14.5,
+          "findingCount": 3
+        },
+        {
+          "path": "src/agents/subagent-spawn.ts",
+          "score": 13.5,
+          "findingCount": 3
+        },
+        {
+          "path": "extensions/diffs/assets/viewer-runtime.js",
+          "score": 13,
+          "findingCount": 2
+        }
+      ],
+      "topDirectories": [
+        {
+          "path": "extensions/discord",
+          "score": 10.507936507936506,
+          "findingCount": 2
+        },
+        {
+          "path": "extensions/browser",
+          "score": 10.455357142857142,
+          "findingCount": 2
+        },
+        {
+          "path": "extensions/whatsapp",
+          "score": 10.409774436090226,
+          "findingCount": 2
+        },
+        {
+          "path": "extensions/slack",
+          "score": 10.338095238095239,
+          "findingCount": 2
+        },
+        {
+          "path": "extensions/telegram",
+          "score": 10.27310924369748,
+          "findingCount": 2
+        }
+      ]
+    },
+    {
+      "id": "emdash",
+      "repo": "emdash-cms/emdash",
+      "cohort": "explicit-ai",
+      "ref": "dbaf8c6f857456b6a449e68d26c5000c1143fadb",
+      "summary": {
+        "fileCount": 1072,
+        "directoryCount": 306,
+        "findingCount": 188,
+        "repoScore": 628.9025793650787,
+        "physicalLineCount": 257938,
+        "logicalLineCount": 120432,
+        "functionCount": 3513,
+        "normalized": {
+          "scorePerFile": 0.5866628538853347,
+          "scorePerKloc": 5.222055428499724,
+          "scorePerFunction": 0.17902151419444315,
+          "findingsPerFile": 0.17537313432835822,
+          "findingsPerKloc": 1.5610468978344625,
+          "findingsPerFunction": 0.05351551380586393
+        }
+      },
+      "ruleCounts": {
+        "defensive.needless-try-catch": 80,
+        "structure.barrel-density": 34,
+        "structure.pass-through-wrappers": 27,
+        "tests.duplicate-mock-setup": 25,
+        "structure.directory-fanout-hotspot": 17,
+        "defensive.async-noise": 5
+      },
+      "topFiles": [
+        {
+          "path": "packages/core/src/plugins/hooks.ts",
+          "score": 12,
+          "findingCount": 2
+        },
+        {
+          "path": "packages/core/src/emdash-runtime.ts",
+          "score": 10,
+          "findingCount": 2
+        },
+        {
+          "path": "packages/core/src/plugins/context.ts",
+          "score": 9,
+          "findingCount": 3
+        },
+        {
+          "path": "packages/marketplace/src/db/queries.ts",
+          "score": 9,
+          "findingCount": 2
+        },
+        {
+          "path": "packages/cloudflare/src/db/playground-middleware.ts",
+          "score": 8,
+          "findingCount": 1
+        }
+      ],
+      "topDirectories": [
+        {
+          "path": "packages/core/src/database/migrations",
+          "score": 5.666666666666666,
+          "findingCount": 1
+        },
+        {
+          "path": "packages/admin/src/components",
+          "score": 5.1875,
+          "findingCount": 1
+        },
+        {
+          "path": "packages/admin/src/lib/api",
+          "score": 4.555555555555555,
+          "findingCount": 1
+        },
+        {
+          "path": "packages/cloudflare/src/db",
+          "score": 4.5,
+          "findingCount": 1
+        },
+        {
+          "path": "packages/core/src/cli/commands",
+          "score": 4.222222222222222,
           "findingCount": 1
         }
       ]
@@ -844,14 +1015,14 @@
   ],
   "cohorts": {
     "explicit-ai": {
-      "repoCount": 5,
+      "repoCount": 7,
       "medians": {
-        "scorePerFile": 1.2,
-        "scorePerKloc": 10.761330654163874,
-        "scorePerFunction": 0.3606132609187599,
-        "findingsPerFile": 0.4,
-        "findingsPerKloc": 4.688546550569323,
-        "findingsPerFunction": 0.09523809523809523
+        "scorePerFile": 1.0115508020684767,
+        "scorePerKloc": 10.310759501413326,
+        "scorePerFunction": 0.2628630811486094,
+        "findingsPerFile": 0.302158273381295,
+        "findingsPerKloc": 3.021296479168373,
+        "findingsPerFunction": 0.0855397148676171
       }
     },
     "mature-oss": {

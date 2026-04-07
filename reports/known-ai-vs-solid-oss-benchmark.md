@@ -6,7 +6,7 @@ Config mode: default
 
 ## Goal
 
-Compare a small cohort of explicitly AI-generated JavaScript/TypeScript repos against older, well-regarded OSS repos using pinned commit SHAs and normalized analyzer metrics.
+Compare a cohort of known AI-generated JavaScript/TypeScript repos against older, well-regarded OSS repos using pinned commit SHAs and normalized analyzer metrics.
 
 ## Reproduction
 
@@ -22,7 +22,7 @@ Report: `reports/known-ai-vs-solid-oss-benchmark.md`
 
 The pinned refs below are the exact commits used for the saved snapshot.
 
-## Explicit AI cohort
+## AI cohort
 
 | Repo | Ref | Age | Stars | Files | Logical LOC | Functions | Score/file | Score/KLOC | Score/function | Findings/file | Findings/KLOC | Findings/function |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -31,6 +31,8 @@ The pinned refs below are the exact commits used for the saved snapshot.
 | `openusage` | `857f537` | 0.2y | 1715 | 139 | 22270 | 491 | 1.27 | 7.95 | 0.36 | 0.30 | 1.89 | 0.09 |
 | `devworkbench` | `ea50862` | 0.8y | 17 | 32 | 2986 | 147 | 1.00 | 10.76 | 0.22 | 0.44 | 4.69 | 0.10 |
 | `fulling` | `d95060f` | 0.5y | 2413 | 219 | 12154 | 574 | 0.52 | 9.41 | 0.20 | 0.16 | 2.80 | 0.06 |
+| `openclaw` | `44cf747` | 0.4y | 350232 | 10580 | 1037965 | 40714 | 1.01 | 10.31 | 0.26 | 0.30 | 3.02 | 0.08 |
+| `emdash` | `dbaf8c6` | 0.0y | 7842 | 1072 | 120432 | 3513 | 0.59 | 5.22 | 0.18 | 0.18 | 1.56 | 0.05 |
 
 ## Mature OSS cohort
 
@@ -49,12 +51,12 @@ The pinned refs below are the exact commits used for the saved snapshot.
 
 | Metric | AI median | Solid median | Ratio |
 |---|---:|---:|---:|
-| Score / file | **1.20** | **0.18** | **6.51x** |
-| Score / KLOC | **10.76** | **4.04** | **2.66x** |
-| Score / function | **0.36** | **0.08** | **4.42x** |
-| Findings / file | **0.40** | **0.06** | **6.76x** |
-| Findings / KLOC | **4.69** | **1.06** | **4.42x** |
-| Findings / function | **0.10** | **0.02** | **4.17x** |
+| Score / file | **1.01** | **0.18** | **5.49x** |
+| Score / KLOC | **10.31** | **4.04** | **2.55x** |
+| Score / function | **0.26** | **0.08** | **3.22x** |
+| Findings / file | **0.30** | **0.06** | **5.10x** |
+| Findings / KLOC | **3.02** | **1.06** | **2.85x** |
+| Findings / function | **0.09** | **0.02** | **3.75x** |
 
 ## Spot-check pairings
 
@@ -67,13 +69,13 @@ The pinned refs below are the exact commits used for the saved snapshot.
 
 ## Top rule families by cohort
 
-### Explicit AI cohort
-- `defensive.needless-try-catch` — 50 (46.7%)
-- `tests.duplicate-mock-setup` — 29 (27.1%)
-- `structure.pass-through-wrappers` — 13 (12.1%)
-- `structure.directory-fanout-hotspot` — 7 (6.5%)
-- `structure.barrel-density` — 5 (4.7%)
-- `defensive.async-noise` — 3 (2.8%)
+### AI cohort
+- `tests.duplicate-mock-setup` — 1057 (30.8%)
+- `defensive.needless-try-catch` — 813 (23.7%)
+- `structure.pass-through-wrappers` — 664 (19.4%)
+- `structure.barrel-density` — 454 (13.2%)
+- `defensive.async-noise` — 323 (9.4%)
+- `structure.directory-fanout-hotspot` — 94 (2.7%)
 
 ### Mature OSS cohort
 - `defensive.needless-try-catch` — 148 (36.5%)
@@ -86,5 +88,6 @@ The pinned refs below are the exact commits used for the saved snapshot.
 ## Notes
 
 - This benchmark is intentionally pinned to exact commit SHAs so future reruns can reproduce the same cohort.
+- AI provenance in the set may come from README disclosures or user-provided provenance recorded in the manifest.
 - The benchmark scanner uses the analyzer's default config for every repo to keep results comparable.
 - The analyzer still only scans JS/TS-family files, so non-JS/TS portions of mixed-language repos are out of scope.

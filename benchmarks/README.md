@@ -17,8 +17,10 @@ A pinned benchmark set gives us:
 - `benchmarks/sets/known-ai-vs-solid-oss.json`
 
 This set compares:
-- a small cohort of repos with explicit AI-generated-code disclosures
+- a cohort of known AI-generated JS/TS repos
 - against older, well-regarded JS/TS OSS repos
+
+AI provenance may come from public README disclosures or user-provided provenance used during benchmark calibration.
 
 ## Reproduce the saved snapshot
 

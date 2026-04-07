@@ -16,7 +16,7 @@ Scan a repo, surface the hotspots, and compare codebases using normalized slop m
 ## Good fit for
 
 - checking third-party repos that feel vibe-coded
-- comparing explicit-AI repos to mature OSS baselines
+- comparing known AI-generated repos to mature OSS baselines
 - finding low-judgment boilerplate in your own codebase
 - iterating on deterministic slop heuristics
 
@@ -85,28 +85,30 @@ Current language support:
 
 ## Benchmarks
 
-The repo ships with a **pinned, recreatable benchmark set** comparing explicit-AI repos against older solid OSS repos.
+The repo ships with a **pinned, recreatable benchmark set** comparing known AI-generated repos against older solid OSS repos.
 
 ### Cohort medians
 
-| Metric | Explicit-AI median | Mature OSS median | Ratio |
+| Metric | AI median | Mature OSS median | Ratio |
 |---|---:|---:|---:|
-| Score / file | **1.20** | **0.18** | **6.51x** |
-| Score / KLOC | **10.76** | **4.04** | **2.66x** |
-| Score / function | **0.36** | **0.08** | **4.42x** |
-| Findings / file | **0.40** | **0.06** | **6.76x** |
-| Findings / KLOC | **4.69** | **1.06** | **4.42x** |
-| Findings / function | **0.10** | **0.02** | **4.17x** |
+| Score / file | **1.01** | **0.18** | **5.49x** |
+| Score / KLOC | **10.31** | **4.04** | **2.55x** |
+| Score / function | **0.26** | **0.08** | **3.22x** |
+| Findings / file | **0.30** | **0.06** | **5.10x** |
+| Findings / KLOC | **3.02** | **1.06** | **2.85x** |
+| Findings / function | **0.09** | **0.02** | **3.75x** |
 
 ### Pinned benchmark snapshot
 
 | Repo | Cohort | Ref | Score/file | Score/KLOC | Findings/file | Findings/KLOC |
 |---|---|---|---:|---:|---:|---:|
-| `universal-pm` | explicit-ai | `2d90bde` | 3.43 | 47.64 | 0.83 | 11.58 |
-| `voice-notifications` | explicit-ai | `8a984b8` | 1.20 | 38.46 | 0.40 | 12.82 |
-| `openusage` | explicit-ai | `857f537` | 1.27 | 7.95 | 0.30 | 1.89 |
-| `devworkbench` | explicit-ai | `ea50862` | 1.00 | 10.76 | 0.44 | 4.69 |
-| `fulling` | explicit-ai | `d95060f` | 0.52 | 9.41 | 0.16 | 2.80 |
+| `universal-pm` | ai | `2d90bde` | 3.43 | 47.64 | 0.83 | 11.58 |
+| `voice-notifications` | ai | `8a984b8` | 1.20 | 38.46 | 0.40 | 12.82 |
+| `openusage` | ai | `857f537` | 1.27 | 7.95 | 0.30 | 1.89 |
+| `devworkbench` | ai | `ea50862` | 1.00 | 10.76 | 0.44 | 4.69 |
+| `fulling` | ai | `d95060f` | 0.52 | 9.41 | 0.16 | 2.80 |
+| `openclaw` | ai | `44cf747` | 1.01 | 10.31 | 0.30 | 3.02 |
+| `emdash` | ai | `dbaf8c6` | 0.59 | 5.22 | 0.18 | 1.56 |
 | `ni` | mature-oss | `6d96905` | 0.11 | 4.68 | 0.02 | 0.94 |
 | `node-notifier` | mature-oss | `b36c237` | 0.08 | 0.90 | 0.04 | 0.47 |
 | `tsup` | mature-oss | `b906f86` | 0.21 | 3.61 | 0.08 | 1.42 |
@@ -154,7 +156,7 @@ That keeps the analyzer deterministic and extensible without turning it into one
 
 - benchmark guide: [`benchmarks/README.md`](benchmarks/README.md)
 - pinned benchmark report: [`reports/known-ai-vs-solid-oss-benchmark.md`](reports/known-ai-vs-solid-oss-benchmark.md)
-- exploratory overfitting check: [`reports/exploratory-vite-astro-openclaw-beads.md`](reports/exploratory-vite-astro-openclaw-beads.md)
+- exploratory note on non-JS/TS candidates: [`reports/exploratory-vite-astro-openclaw-beads.md`](reports/exploratory-vite-astro-openclaw-beads.md)
 - project spec: [`PROJECT_SPEC.md`](PROJECT_SPEC.md)
 
 ## Contributing
@@ -166,6 +168,12 @@ If you change rule behavior, rerun:
 ```bash
 bun test
 bun run benchmark:update
+```
+
+## License
+
+A `LICENSE` file has not been added yet.
+date
 ```
 
 ## License

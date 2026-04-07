@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "known-ai-vs-solid-oss",
   "name": "Known AI repos vs older solid OSS repos",
-  "description": "Compare a small cohort of explicitly AI-generated JavaScript/TypeScript repos against older, well-regarded OSS repos using pinned commit SHAs and normalized analyzer metrics.",
+  "description": "Compare a cohort of known AI-generated JavaScript/TypeScript repos against older, well-regarded OSS repos using pinned commit SHAs and normalized analyzer metrics.",
   "artifacts": {
     "checkoutsDir": "benchmarks/.cache/checkouts/known-ai-vs-solid-oss",
     "snapshotPath": "benchmarks/results/known-ai-vs-solid-oss.json",
@@ -63,6 +63,28 @@
       "stars": 2413,
       "provenance": "README: \"100% AI-generated code.\"",
       "notes": "Large AI-built full-stack engineering agent project."
+    },
+    {
+      "id": "openclaw",
+      "repo": "openclaw/openclaw",
+      "url": "https://github.com/openclaw/openclaw.git",
+      "cohort": "explicit-ai",
+      "ref": "44cf74717b4507245648a0263f3b0df85aa2a813",
+      "createdAt": "2025-11-24T10:16:47Z",
+      "stars": 350232,
+      "provenance": "User-provided provenance: repo is AI-generated.",
+      "notes": "Very large TypeScript-heavy AI-generated product repo used to test whether the analyzer keeps signal on big codebases."
+    },
+    {
+      "id": "emdash",
+      "repo": "emdash-cms/emdash",
+      "url": "https://github.com/emdash-cms/emdash.git",
+      "cohort": "explicit-ai",
+      "ref": "dbaf8c6f857456b6a449e68d26c5000c1143fadb",
+      "createdAt": "2026-04-01T08:45:02Z",
+      "stars": 7842,
+      "provenance": "User-provided provenance: repo is AI-generated.",
+      "notes": "Large Astro-based CMS that helps separate polished AI-generated product code from obvious slop-heavy toy repos."
     },
     {
       "id": "ni",
