@@ -1,4 +1,4 @@
-import { readdir, readFile } from "node:fs/promises";
+import { readdir } from "node:fs/promises";
 import path from "node:path";
 import type { AnalyzerConfig } from "../config";
 import type { DirectoryRecord, FileRecord, LanguagePlugin } from "../core/types";
@@ -81,14 +81,12 @@ export async function discoverSourceFiles(
       }
 
       const absolutePath = path.join(rootDir, relativePath);
-      const text = await readFile(absolutePath, "utf8");
-
       files.push({
         path: relativePath,
         absolutePath,
         extension: path.extname(relativePath),
-        text,
-        lineCount: text.length === 0 ? 0 : text.split(/\r?\n/).length,
+        lineCount: 0,
+        logicalLineCount: 0,
         languageId: language.id,
       });
     }

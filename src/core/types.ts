@@ -6,8 +6,8 @@ export interface FileRecord {
   path: string;
   absolutePath: string;
   extension: string;
-  text: string;
   lineCount: number;
+  logicalLineCount: number;
   languageId: string | null;
 }
 

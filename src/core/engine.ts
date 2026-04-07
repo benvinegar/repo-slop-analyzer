@@ -1,6 +1,10 @@
+import { readFile } from "node:fs/promises";
 import type { AnalyzerConfig } from "../config";
 import { discoverSourceFiles } from "../discovery/walk";
+import { countLogicalLines } from "../facts/ts-helpers";
+import type { FunctionSummary } from "../facts/types";
 import { FactStore } from "./fact-store";
+import { Registry } from "./registry";
 import { orderFactProviders, validateRuleRequirements } from "./scheduler";
 import type {
   AnalysisResult,
@@ -13,9 +17,15 @@ import type {
   ProviderContext,
   RulePlugin,
 } from "./types";
-import { Registry } from "./registry";
-import { countLogicalLines } from "../facts/ts-helpers";
-import type { FunctionSummary } from "../facts/types";
+
+export interface AnalyzeRepositoryHooks {
+  onFileAnalyzed?(file: FileRecord, store: FactStore): void;
+  onFileReleased?(file: FileRecord, store: FactStore): void;
+}
+
+export interface AnalyzeRepositoryOptions {
+  hooks?: AnalyzeRepositoryHooks;
+}
 
 function createRuntime(
   rootDir: string,
@@ -77,24 +87,54 @@ async function runRules(rules: RulePlugin[], contexts: ProviderContext[]): Promi
 }
 
 function buildFileScores(files: FileRecord[], findings: Finding[]) {
+  const byFile = new Map<string, { score: number; findingCount: number }>();
+
+  for (const finding of findings) {
+    if (!finding.path) {
+      continue;
+    }
+
+    const next = byFile.get(finding.path) ?? { score: 0, findingCount: 0 };
+    next.score += finding.score;
+    next.findingCount += 1;
+    byFile.set(finding.path, next);
+  }
+
   return files
     .map((file) => {
-      const fileFindings = findings.filter((finding) => finding.path === file.path);
-      const score = fileFindings.reduce((total, finding) => total + finding.score, 0);
-      return { path: file.path, score, findingCount: fileFindings.length };
+      const aggregate = byFile.get(file.path);
+      return {
+        path: file.path,
+        score: aggregate?.score ?? 0,
+        findingCount: aggregate?.findingCount ?? 0,
+      };
     })
     .filter((score) => score.findingCount > 0)
     .sort((left, right) => right.score - left.score || left.path.localeCompare(right.path));
 }
 
 function buildDirectoryScores(directories: DirectoryRecord[], findings: Finding[]) {
+  const byDirectory = new Map<string, { score: number; findingCount: number }>();
+
+  for (const finding of findings) {
+    if (finding.scope !== "directory" || !finding.path) {
+      continue;
+    }
+
+    const next = byDirectory.get(finding.path) ?? { score: 0, findingCount: 0 };
+    next.score += finding.score;
+    next.findingCount += 1;
+    byDirectory.set(finding.path, next);
+  }
+
   return directories
     .map((directory) => {
-      const directoryFindings = findings.filter(
-        (finding) => finding.scope === "directory" && finding.path === directory.path,
-      );
-      const score = directoryFindings.reduce((total, finding) => total + finding.score, 0);
-      return { path: directory.path, score, findingCount: directoryFindings.length };
+      const aggregate = byDirectory.get(directory.path);
+      return {
+        path: directory.path,
+        score: aggregate?.score ?? 0,
+        findingCount: aggregate?.findingCount ?? 0,
+      };
     })
     .filter((score) => score.findingCount > 0)
     .sort((left, right) => right.score - left.score || left.path.localeCompare(right.path));
@@ -107,7 +147,7 @@ function divideOrNull(numerator: number, denominator: number): number | null {
 function buildSummary(files: FileRecord[], directories: DirectoryRecord[], findings: Finding[], store: FactStore): AnalysisSummary {
   const repoScore = findings.reduce((total, finding) => total + finding.score, 0);
   const physicalLineCount = files.reduce((total, file) => total + file.lineCount, 0);
-  const logicalLineCount = files.reduce((total, file) => total + countLogicalLines(file.text, file.path), 0);
+  const logicalLineCount = files.reduce((total, file) => total + file.logicalLineCount, 0);
   const functionCount = files.reduce(
     (total, file) => total + (store.getFileFact<FunctionSummary[]>(file.path, "file.functionSummaries")?.length ?? 0),
     0,
@@ -133,33 +173,38 @@ function buildSummary(files: FileRecord[], directories: DirectoryRecord[], findi
   };
 }
 
+function requiredFileFacts(items: Array<{ requires: string[] }>): Set<string> {
+  const facts = new Set<string>();
+
+  for (const item of items) {
+    for (const factId of item.requires) {
+      if (factId.startsWith("file.")) {
+        facts.add(factId);
+      }
+    }
+  }
+
+  return facts;
+}
+
 export async function analyzeRepository(
   rootDir: string,
   config: AnalyzerConfig,
   registry: Registry,
+  options: AnalyzeRepositoryOptions = {},
 ): Promise<AnalysisResult> {
   const discovery = await discoverSourceFiles(rootDir, config, registry.getLanguages());
   const store = new FactStore();
   const runtime = createRuntime(rootDir, config, discovery.files, discovery.directories, store);
 
-  for (const file of discovery.files) {
-    store.setFileFact(file.path, "file.record", file);
-    store.setFileFact(file.path, "file.text", file.text);
-    store.setFileFact(file.path, "file.lineCount", file.lineCount);
-  }
-
-  for (const directory of discovery.directories) {
-    store.setDirectoryFact(directory.path, "directory.record", directory);
-  }
-
-  store.setRepoFact("repo.files", discovery.files);
-  store.setRepoFact("repo.directories", discovery.directories);
-
   const fileProviders = registry.getFactProviders().filter((provider) => provider.scope === "file");
   const directoryProviders = registry.getFactProviders().filter((provider) => provider.scope === "directory");
   const repoProviders = registry.getFactProviders().filter((provider) => provider.scope === "repo");
+  const fileRules = registry.getRules().filter((rule) => rule.scope === "file");
+  const directoryRules = registry.getRules().filter((rule) => rule.scope === "directory");
+  const repoRules = registry.getRules().filter((rule) => rule.scope === "repo");
 
-  const fileBaseFacts = ["file.record", "file.text", "file.lineCount"];
+  const fileBaseFacts = ["file.record", "file.text", "file.lineCount", "file.logicalLineCount"];
   const orderedFileProviders = orderFactProviders(fileProviders, fileBaseFacts);
   const fileDerivedFacts = orderedFileProviders.flatMap((provider) => provider.provides);
 
@@ -179,18 +224,6 @@ export async function analyzeRepository(
     ...directoryDerivedFacts,
   ]);
 
-  await runProviders(
-    orderedFileProviders,
-    discovery.files.map((file) => ({ scope: "file", file, runtime })),
-    store,
-  );
-  await runProviders(
-    orderedDirectoryProviders,
-    discovery.directories.map((directory) => ({ scope: "directory", directory, runtime })),
-    store,
-  );
-  await runProviders(orderedRepoProviders, [{ scope: "repo", runtime }], store);
-
   const availableFacts = [
     ...fileBaseFacts,
     ...fileDerivedFacts,
@@ -206,20 +239,69 @@ export async function analyzeRepository(
     availableFacts,
   );
 
-  const fileFindings = await runRules(
-    registry.getRules().filter((rule) => rule.scope === "file"),
-    discovery.files.map((file) => ({ scope: "file", file, runtime })),
-  );
-  const directoryFindings = await runRules(
-    registry.getRules().filter((rule) => rule.scope === "directory"),
-    discovery.directories.map((directory) => ({ scope: "directory", directory, runtime })),
-  );
-  const repoFindings = await runRules(
-    registry.getRules().filter((rule) => rule.scope === "repo"),
-    [{ scope: "repo", runtime }],
-  );
+  const immediateFileRules = fileRules.filter((rule) => rule.requires.every((factId) => factId.startsWith("file.")));
+  const delayedFileRules = fileRules.filter((rule) => !immediateFileRules.includes(rule));
 
-  const findings = [...fileFindings, ...directoryFindings, ...repoFindings];
+  const durableFileFacts = new Set<string>(["file.lineCount", "file.logicalLineCount"]);
+  for (const factId of requiredFileFacts([
+    ...orderedDirectoryProviders,
+    ...orderedRepoProviders,
+    ...delayedFileRules,
+    ...directoryRules,
+    ...repoRules,
+  ])) {
+    durableFileFacts.add(factId);
+  }
+
+  store.setRepoFact("repo.files", discovery.files);
+  store.setRepoFact("repo.directories", discovery.directories);
+
+  for (const directory of discovery.directories) {
+    store.setDirectoryFact(directory.path, "directory.record", directory);
+  }
+
+  const findings: Finding[] = [];
+
+  for (const file of discovery.files) {
+    const text = await readFile(file.absolutePath, "utf8");
+    file.lineCount = text.length === 0 ? 0 : text.split(/\r?\n/).length;
+    file.logicalLineCount = countLogicalLines(text, file.path);
+
+    store.setFileFact(file.path, "file.record", file);
+    store.setFileFact(file.path, "file.text", text);
+    store.setFileFact(file.path, "file.lineCount", file.lineCount);
+    store.setFileFact(file.path, "file.logicalLineCount", file.logicalLineCount);
+
+    const context = { scope: "file", file, runtime } satisfies ProviderContext;
+    await runProviders(orderedFileProviders, [context], store);
+    findings.push(...(await runRules(immediateFileRules, [context])));
+    options.hooks?.onFileAnalyzed?.(file, store);
+
+    store.retainFileFacts(file.path, durableFileFacts);
+    options.hooks?.onFileReleased?.(file, store);
+  }
+
+  await runProviders(
+    orderedDirectoryProviders,
+    discovery.directories.map((directory) => ({ scope: "directory", directory, runtime })),
+    store,
+  );
+  await runProviders(orderedRepoProviders, [{ scope: "repo", runtime }], store);
+
+  findings.push(
+    ...(await runRules(
+      delayedFileRules,
+      discovery.files.map((file) => ({ scope: "file", file, runtime })),
+    )),
+  );
+  findings.push(
+    ...(await runRules(
+      directoryRules,
+      discovery.directories.map((directory) => ({ scope: "directory", directory, runtime })),
+    )),
+  );
+  findings.push(...(await runRules(repoRules, [{ scope: "repo", runtime }])));
+
   const fileScores = buildFileScores(discovery.files, findings);
   const directoryScores = buildDirectoryScores(discovery.directories, findings);
   const summary = buildSummary(discovery.files, discovery.directories, findings, store);

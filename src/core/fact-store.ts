@@ -52,4 +52,29 @@ export class FactStore implements FactStoreReader {
   hasFileFact(filePath: string, factId: string): boolean {
     return this.fileFacts.get(filePath)?.has(factId) ?? false;
   }
+
+  retainFileFacts(filePath: string, factIds: Iterable<string>): void {
+    const facts = this.fileFacts.get(filePath);
+    if (!facts) {
+      return;
+    }
+
+    const keep = new Set(factIds);
+    for (const factId of facts.keys()) {
+      if (!keep.has(factId)) {
+        facts.delete(factId);
+      }
+    }
+
+    if (facts.size === 0) {
+      this.fileFacts.delete(filePath);
+    }
+  }
+
+  listFilePathsWithFact(factId: string): string[] {
+    return [...this.fileFacts.entries()]
+      .filter(([, facts]) => facts.has(factId))
+      .map(([filePath]) => filePath)
+      .sort((left, right) => left.localeCompare(right));
+  }
 }

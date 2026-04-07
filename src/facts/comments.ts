@@ -14,9 +14,9 @@ export const commentsFactProvider: FactProvider = {
     return context.scope === "file" && Boolean(context.file);
   },
   run(context) {
-    const text = context.runtime.store.getFileFact<string>(context.file!.path, "file.text") ?? context.file!.text;
+    const text = context.runtime.store.getFileFact<string>(context.file!.path, "file.text");
     const sourceFile = context.runtime.store.getFileFact<ts.SourceFile>(context.file!.path, "file.ast");
-    if (!sourceFile) {
+    if (!text || !sourceFile) {
       return { "file.comments": [] satisfies CommentSummary[] };
     }
 

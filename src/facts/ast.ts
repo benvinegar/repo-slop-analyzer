@@ -16,9 +16,14 @@ export const astFactProvider: FactProvider = {
       return {};
     }
 
+    const text = context.runtime.store.getFileFact<string>(file.path, "file.text");
+    if (text === undefined) {
+      return {};
+    }
+
     const sourceFile = ts.createSourceFile(
       file.path,
-      file.text,
+      text,
       ts.ScriptTarget.Latest,
       true,
       getScriptKind(file.path),
