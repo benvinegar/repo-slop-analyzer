@@ -22,6 +22,20 @@ Scan a repo, surface the hotspots, and compare codebases using normalized slop m
 
 ## Install
 
+Install globally with npm:
+
+```bash
+npm install -g repo-slop-analyzer
+```
+
+Or run it once with npx:
+
+```bash
+npx repo-slop-analyzer scan .
+```
+
+For local development in this repo:
+
 ```bash
 bun install
 ```
@@ -31,16 +45,16 @@ bun install
 Scan the current repo:
 
 ```bash
-bun run src/cli.ts scan .
+repo-slop-analyzer scan .
 ```
 
 Scan another repo and get JSON:
 
 ```bash
-bun run src/cli.ts scan /path/to/repo --json
+repo-slop-analyzer scan /path/to/repo --json
 ```
 
-Recreate the pinned benchmark set:
+Recreate the pinned benchmark set from a source checkout:
 
 ```bash
 bun run benchmark:update

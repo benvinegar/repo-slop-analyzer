@@ -1,3 +1,4 @@
 .pi/
 node_modules/
+dist/
 benchmarks/.cache/
