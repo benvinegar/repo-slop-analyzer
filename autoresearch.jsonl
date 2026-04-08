@@ -14,3 +14,5 @@
 {"run":13,"commit":"0a4debb","metric":9368.005,"metrics":{},"status":"discard","description":"Skip test mock AST walks for test files whose text lacks any mock-related substrings","timestamp":1775664729537,"segment":0}
 {"run":14,"commit":"0a4debb","metric":9243.059,"metrics":{},"status":"discard","description":"Match mock-related call paths from path segments before joining the full expression path string","timestamp":1775664829563,"segment":0}
 {"run":15,"commit":"0a4debb","metric":9469.502,"metrics":{},"status":"discard","description":"Short-circuit await detection with a dedicated recursive search instead of the generic walk helper","timestamp":1775664883665,"segment":0}
+{"run":16,"commit":"d48202c","metric":8064.977,"metrics":{},"status":"keep","description":"Use synchronous file reads in the sequential scan loop to remove per-file promise overhead","timestamp":1775664941228,"segment":0}
+{"run":17,"commit":"d48202c","metric":8209.543,"metrics":{},"status":"discard","description":"Switch recursive discovery from async readdir to synchronous readdirSync","timestamp":1775665003004,"segment":0}

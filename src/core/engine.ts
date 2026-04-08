@@ -37,6 +37,10 @@ function createRuntime(
   return { rootDir, config, files, directories, store };
 }
 
+function isPromiseLike<T>(value: T | Promise<T>): value is Promise<T> {
+  return typeof value === "object" && value !== null && "then" in value;
+}
+
 async function runProviders(
   providers: FactProvider[],
   contexts: ProviderContext[],
@@ -48,7 +52,10 @@ async function runProviders(
         continue;
       }
 
-      const producedFacts = await provider.run(context);
+      const producedFactsResult = provider.run(context);
+      const producedFacts = isPromiseLike(producedFactsResult)
+        ? await producedFactsResult
+        : producedFactsResult;
       for (const [factId, value] of Object.entries(producedFacts)) {
         if (context.scope === "file" && context.file) {
           store.setFileFact(context.file.path, factId, value);
@@ -73,7 +80,10 @@ async function runRules(rules: RulePlugin[], contexts: ProviderContext[]): Promi
       }
 
       const weight = ruleConfig?.weight ?? 1;
-      const nextFindings = await rule.evaluate(context);
+      const nextFindingsResult = rule.evaluate(context);
+      const nextFindings = isPromiseLike(nextFindingsResult)
+        ? await nextFindingsResult
+        : nextFindingsResult;
       findings.push(
         ...nextFindings.map((finding) => ({
           ...finding,
