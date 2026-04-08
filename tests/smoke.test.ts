@@ -9,6 +9,7 @@ describe("project scaffold", () => {
     expect(formatHelp()).toContain("scan");
     expect(formatHelp()).toContain("--lint");
     expect(formatHelp()).toContain("pluggable registry");
+    expect(formatHelp()).toContain("--ignore");
   });
 
   test("loadConfig returns defaults when config file is absent", async () => {
