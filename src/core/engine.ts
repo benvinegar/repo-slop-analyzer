@@ -56,7 +56,8 @@ async function runProviders(
       const producedFacts = isPromiseLike(producedFactsResult)
         ? await producedFactsResult
         : producedFactsResult;
-      for (const [factId, value] of Object.entries(producedFacts)) {
+      for (const factId in producedFacts) {
+        const value = producedFacts[factId];
         if (context.scope === "file" && context.file) {
           store.setFileFact(context.file.path, factId, value);
         } else if (context.scope === "directory" && context.directory) {
@@ -84,12 +85,12 @@ async function runRules(rules: RulePlugin[], contexts: ProviderContext[]): Promi
       const nextFindings = isPromiseLike(nextFindingsResult)
         ? await nextFindingsResult
         : nextFindingsResult;
-      findings.push(
-        ...nextFindings.map((finding) => ({
+      for (const finding of nextFindings) {
+        findings.push({
           ...finding,
           score: finding.score * weight,
-        })),
-      );
+        });
+      }
     }
   }
 
