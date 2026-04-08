@@ -235,4 +235,4 @@ bun run benchmark:update
 
 ## License
 
-A `LICENSE` file has not been added yet.
+MIT
