@@ -70,32 +70,54 @@ function collectLocalNames(node: ts.FunctionLikeDeclarationBase): Set<string> {
 }
 
 function serializeDuplicateFingerprintNode(node: ts.Node, localNames: Set<string>): string {
-  if (ts.isIdentifier(node)) {
-    return localNames.has(node.text) ? "local" : `id:${node.text}`;
+  const parts: string[] = [];
+
+  function visit(current: ts.Node): void {
+    if (ts.isIdentifier(current)) {
+      parts.push(localNames.has(current.text) ? "local" : `id:${current.text}`);
+      return;
+    }
+
+    if (ts.isPrivateIdentifier(current)) {
+      parts.push("private");
+      return;
+    }
+
+    if (
+      ts.isStringLiteralLike(current)
+      || ts.isNumericLiteral(current)
+      || ts.isNoSubstitutionTemplateLiteral(current)
+      || ts.isTemplateHead(current)
+      || ts.isTemplateMiddle(current)
+      || ts.isTemplateTail(current)
+    ) {
+      parts.push(`literal:${ts.SyntaxKind[current.kind]}`);
+      return;
+    }
+
+    const label = ts.SyntaxKind[current.kind];
+    const children: ts.Node[] = [];
+    current.forEachChild((child) => {
+      children.push(child);
+    });
+
+    if (children.length === 0) {
+      parts.push(label);
+      return;
+    }
+
+    parts.push(label, "(");
+    for (let index = 0; index < children.length; index += 1) {
+      if (index > 0) {
+        parts.push(",");
+      }
+      visit(children[index]!);
+    }
+    parts.push(")");
   }
 
-  if (ts.isPrivateIdentifier(node)) {
-    return "private";
-  }
-
-  if (
-    ts.isStringLiteralLike(node)
-    || ts.isNumericLiteral(node)
-    || ts.isNoSubstitutionTemplateLiteral(node)
-    || ts.isTemplateHead(node)
-    || ts.isTemplateMiddle(node)
-    || ts.isTemplateTail(node)
-  ) {
-    return `literal:${ts.SyntaxKind[node.kind]}`;
-  }
-
-  const label = ts.SyntaxKind[node.kind];
-  const children: string[] = [];
-  node.forEachChild((child) => {
-    children.push(serializeDuplicateFingerprintNode(child, localNames));
-  });
-
-  return children.length === 0 ? label : `${label}(${children.join(",")})`;
+  visit(node);
+  return parts.join("");
 }
 
 function buildDuplicationFingerprint(
