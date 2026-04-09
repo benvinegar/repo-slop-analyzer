@@ -4,18 +4,31 @@
 
 ## Start here
 
-- `README.md` for product behavior and CLI expectations.
+- `README.md` for product behavior, CLI expectations, config shape, and benchmark context.
 - `src/default-registry.ts` for the active languages, facts, rules, and reporters.
 - `src/core/engine.ts` for execution flow.
+- `src/core/types.ts` for plugin contracts and result shapes.
 - `tests/heuristics.test.ts` and `tests/fixtures-regression.test.ts` for behavioral expectations.
+
+## Mental model
+
+- Language plugins decide which files are in scope.
+- Fact providers compute reusable signals at `file`, `directory`, or `repo` scope.
+- Rules consume facts and emit findings with evidence, severity, and score.
+- Reporters render the final analysis as text, lint output, or JSON.
+- Config tunes built-ins via `ignores`, `rules`, and path-scoped `overrides`; it does not define new rules.
 
 ## Navigation
 
 - CLI entry: `src/cli.ts`
 - Core contracts: `src/core/types.ts`
+- Registry assembly: `src/default-registry.ts`
+- Analysis flow and override resolution: `src/core/engine.ts`
 - Fact dependency ordering: `src/core/scheduler.ts`
+- Shared fact storage: `src/core/fact-store.ts`
+- Discovery / ignore handling: `src/discovery/walk.ts`
 - Reusable signals: `src/facts/*`
-- Findings logic: `src/rules/*`
+- Findings logic: `src/rules/*` (flat files; grouping is by rule `id` / `family`, not folders)
 - Output formats: `src/reporters/*`
 - Current language scope: `src/languages/javascript-like.ts`
 
@@ -23,7 +36,10 @@
 
 - Preserve determinism, stable ordering, and explainable evidence.
 - Prefer adding/extending facts and rules over special-casing the engine.
-- Register new languages, fact providers, rules, and reporters in `src/default-registry.ts`.
+- New analyzer behavior usually means: extend `src/facts/types.ts` if needed, add/adjust a fact provider, add/adjust a rule, register it in `src/default-registry.ts`, then add tests.
+- Rules are manually registered in `src/default-registry.ts`; there is no auto-discovery from `src/rules/`.
+- Keep file/directory/repo scopes in mind. This is a repo-scoped analysis engine, not just a bag of single-file lint checks.
+- The codebase is internally pluggable, but the shipped CLI currently uses a fixed default registry. Config can tune built-ins, not load third-party rule modules.
 - Edit `src/`; `dist/` and benchmark result/report artifacts are generated outputs.
 - Do not tune heuristics to a single fixture or benchmark repo.
 
@@ -33,7 +49,8 @@
 - `bun run lint` (includes the last published `slop-scan` self-scan regression check)
 - `bun test`
 - `bun run src/cli.ts scan <path> [--json|--lint]`
-- The committed root `slop-scan.config.json` exists mainly for repo self-scan/local validation; it excludes benchmark cache and intentionally uses path-scoped overrides to disable directory-structure rules under `src/rules/**`.
+- The committed root `slop-scan.config.json` exists mainly for repo self-scan/local validation; it excludes benchmark cache and uses path-scoped overrides to disable directory-structure rules under `src/rules/**`.
+- Stable self-scan runs the last published package, so newer config features may lag there; use the committed baseline in `tests/fixtures/self-scan-stable-baseline.json` as the source of truth for accepted stable-release behavior.
 - If rule behavior changes, update focused tests and `tests/fixtures-regression.test.ts`.
 - If stable self-scan regressions are intentional, refresh `tests/fixtures/self-scan-stable-baseline.json` with `bun run lint:self:update`.
 - If benchmark-facing behavior changes materially, rerun `bun run benchmark:update` intentionally.
