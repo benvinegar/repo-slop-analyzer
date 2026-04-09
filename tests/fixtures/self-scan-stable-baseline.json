@@ -1,20 +1,20 @@
 {
   "scannerVersion": "0.1.2",
   "summary": {
-    "fileCount": 55,
+    "fileCount": 59,
     "directoryCount": 16,
     "findingCount": 5,
-    "repoScore": 7.271428571428571,
-    "physicalLineCount": 5167,
-    "logicalLineCount": 3606,
-    "functionCount": 172,
+    "repoScore": 8.021428571428572,
+    "physicalLineCount": 5975,
+    "logicalLineCount": 4238,
+    "functionCount": 192,
     "normalized": {
-      "scorePerFile": 0.13220779220779222,
-      "scorePerKloc": 2.016480469059504,
-      "scorePerFunction": 0.04227574750830565,
-      "findingsPerFile": 0.09090909090909091,
-      "findingsPerKloc": 1.3865779256794233,
-      "findingsPerFunction": 0.029069767441860465
+      "scorePerFile": 0.13595641646489107,
+      "scorePerKloc": 1.892739162677813,
+      "scorePerFunction": 0.041778273809523814,
+      "findingsPerFile": 0.0847457627118644,
+      "findingsPerKloc": 1.1798017932987257,
+      "findingsPerFunction": 0.026041666666666668
     }
   },
   "ruleCounts": {

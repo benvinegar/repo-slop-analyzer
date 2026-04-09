@@ -1,5 +1,7 @@
+import { globby } from "globby";
 import { readFileSync } from "node:fs";
-import type { AnalyzerConfig } from "../config";
+import path from "node:path";
+import type { AnalyzerConfig, RuleConfig } from "../config";
 import { discoverSourceFiles } from "../discovery/walk";
 import { countLogicalLines, countPhysicalLines } from "../facts/ts-helpers";
 import type { FunctionSummary } from "../facts/types";
@@ -25,6 +27,133 @@ export interface AnalyzeRepositoryHooks {
 
 export interface AnalyzeRepositoryOptions {
   hooks?: AnalyzeRepositoryHooks;
+}
+
+interface ResolvedRuleOverride {
+  rules: Record<string, RuleConfig>;
+  filePaths: Set<string>;
+  directoryPaths: Set<string>;
+}
+
+function normalizePath(value: string): string {
+  return value.split(path.sep).join("/").replace(/^\.\//, "");
+}
+
+function staticGlobPrefix(pattern: string): string {
+  const normalized = normalizePath(pattern).replace(/\/+$/, "");
+  if (normalized.length === 0) {
+    return ".";
+  }
+
+  const segments = normalized.split("/");
+  const staticSegments: string[] = [];
+
+  for (const segment of segments) {
+    if (/[*?[\]{}()!+@]/.test(segment)) {
+      break;
+    }
+    staticSegments.push(segment);
+  }
+
+  return staticSegments.length > 0 ? staticSegments.join("/") : ".";
+}
+
+async function resolveRuleOverrides(
+  rootDir: string,
+  config: AnalyzerConfig,
+  files: FileRecord[],
+  directories: DirectoryRecord[],
+): Promise<ResolvedRuleOverride[]> {
+  const scannedFilePaths = new Set(files.map((file) => file.path));
+  const scannedDirectoryPaths = new Set(directories.map((directory) => directory.path));
+
+  return Promise.all(
+    config.overrides.map(async (override) => {
+      const matchedFiles = (
+        await globby(override.files, {
+          cwd: rootDir,
+          onlyFiles: true,
+          dot: true,
+          followSymbolicLinks: false,
+          ignore: config.ignores,
+          ignoreFiles: ".gitignore",
+        })
+      )
+        .map(normalizePath)
+        .filter((filePath) => scannedFilePaths.has(filePath));
+      const matchedDirectories = (
+        await globby(override.files, {
+          cwd: rootDir,
+          onlyDirectories: true,
+          dot: true,
+          followSymbolicLinks: false,
+          ignore: config.ignores,
+          ignoreFiles: ".gitignore",
+        })
+      )
+        .map(normalizePath)
+        .filter((directoryPath) => scannedDirectoryPaths.has(directoryPath));
+
+      const filePaths = new Set(matchedFiles);
+      const directoryPaths = new Set(matchedDirectories);
+
+      if (matchedFiles.length > 0 || matchedDirectories.length > 0) {
+        for (const pattern of override.files) {
+          const prefix = staticGlobPrefix(pattern);
+          if (prefix !== "." && scannedDirectoryPaths.has(prefix)) {
+            directoryPaths.add(prefix);
+          }
+        }
+      }
+
+      return {
+        rules: override.rules,
+        filePaths,
+        directoryPaths,
+      };
+    }),
+  );
+}
+
+function resolveRuleConfig(
+  context: ProviderContext,
+  ruleId: string,
+  overrides: ResolvedRuleOverride[],
+): RuleConfig | undefined {
+  let resolved = context.runtime.config.rules[ruleId]
+    ? { ...context.runtime.config.rules[ruleId] }
+    : undefined;
+
+  if (context.scope === "repo") {
+    return resolved;
+  }
+
+  const targetPath = context.file?.path ?? context.directory?.path;
+  if (!targetPath) {
+    return resolved;
+  }
+
+  for (const override of overrides) {
+    const matches =
+      context.scope === "file"
+        ? override.filePaths.has(targetPath)
+        : override.directoryPaths.has(targetPath);
+    if (!matches) {
+      continue;
+    }
+
+    const ruleOverride = override.rules[ruleId];
+    if (!ruleOverride) {
+      continue;
+    }
+
+    resolved = {
+      ...resolved,
+      ...ruleOverride,
+    };
+  }
+
+  return resolved;
 }
 
 function createRuntime(
@@ -70,12 +199,16 @@ async function runProviders(
   }
 }
 
-async function runRules(rules: RulePlugin[], contexts: ProviderContext[]): Promise<Finding[]> {
+async function runRules(
+  rules: RulePlugin[],
+  contexts: ProviderContext[],
+  overrides: ResolvedRuleOverride[],
+): Promise<Finding[]> {
   const findings: Finding[] = [];
 
   for (const context of contexts) {
     for (const rule of rules) {
-      const ruleConfig = context.runtime.config.rules[rule.id];
+      const ruleConfig = resolveRuleConfig(context, rule.id, overrides);
       if (ruleConfig?.enabled === false || !rule.supports(context)) {
         continue;
       }
@@ -212,6 +345,12 @@ export async function analyzeRepository(
   options: AnalyzeRepositoryOptions = {},
 ): Promise<AnalysisResult> {
   const discovery = await discoverSourceFiles(rootDir, config, registry.getLanguages());
+  const resolvedRuleOverrides = await resolveRuleOverrides(
+    rootDir,
+    config,
+    discovery.files,
+    discovery.directories,
+  );
   const store = new FactStore();
   const runtime = createRuntime(rootDir, config, discovery.files, discovery.directories, store);
 
@@ -298,7 +437,7 @@ export async function analyzeRepository(
 
     const context = { scope: "file", file, runtime } satisfies ProviderContext;
     await runProviders(orderedFileProviders, [context], store);
-    findings.push(...(await runRules(immediateFileRules, [context])));
+    findings.push(...(await runRules(immediateFileRules, [context], resolvedRuleOverrides)));
     options.hooks?.onFileAnalyzed?.(file, store);
 
     store.retainFileFacts(file.path, durableFileFacts);
@@ -316,15 +455,19 @@ export async function analyzeRepository(
     ...(await runRules(
       delayedFileRules,
       discovery.files.map((file) => ({ scope: "file", file, runtime })),
+      resolvedRuleOverrides,
     )),
   );
   findings.push(
     ...(await runRules(
       directoryRules,
       discovery.directories.map((directory) => ({ scope: "directory", directory, runtime })),
+      resolvedRuleOverrides,
     )),
   );
-  findings.push(...(await runRules(repoRules, [{ scope: "repo", runtime }])));
+  findings.push(
+    ...(await runRules(repoRules, [{ scope: "repo", runtime }], resolvedRuleOverrides)),
+  );
 
   const fileScores = buildFileScores(discovery.files, findings);
   const directoryScores = buildDirectoryScores(discovery.directories, findings);

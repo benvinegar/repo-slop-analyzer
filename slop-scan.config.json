@@ -8,5 +8,14 @@
     "**/*.generated.*",
     "benchmarks/.cache/**",
     "tests/fixtures/repos/**"
+  ],
+  "overrides": [
+    {
+      "files": ["src/rules/**"],
+      "rules": {
+        "structure.directory-fanout-hotspot": { "enabled": false },
+        "structure.over-fragmentation": { "enabled": false }
+      }
+    }
   ]
 }

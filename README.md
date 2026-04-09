@@ -200,7 +200,16 @@ The analyzer reads `slop-scan.config.json` from the scan root and also respects 
   "rules": {
     "structure.over-fragmentation": { "enabled": true, "weight": 1.2 },
     "comments.placeholder-comments": { "enabled": false }
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/rules/**"],
+      "rules": {
+        "structure.directory-fanout-hotspot": { "enabled": false },
+        "structure.over-fragmentation": { "enabled": false }
+      }
+    }
+  ]
 }
 ```
 
@@ -209,8 +218,11 @@ Supported today:
 - `ignores`
 - `rules.<id>.enabled`
 - `rules.<id>.weight`
+- `overrides[].files`
+- `overrides[].rules.<id>.enabled`
+- `overrides[].rules.<id>.weight`
 
-This repo also commits a root [`slop-scan.config.json`](slop-scan.config.json) for self-scans and local development. It keeps the scan focused on the tool itself by excluding heavyweight benchmark checkouts and intentionally slop-heavy fixture repos.
+This repo also commits a root [`slop-scan.config.json`](slop-scan.config.json) for self-scans and local development. It keeps the scan focused on the tool itself by excluding heavyweight benchmark checkouts and intentionally disables directory-structure rules under `src/rules/**`.
 
 ## How it works
 

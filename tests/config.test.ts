@@ -37,6 +37,16 @@ function withRuleConfig(
   };
 }
 
+function withPathOverride(
+  files: string[],
+  rules: Record<string, { enabled?: boolean; weight?: number }>,
+): AnalyzerConfig {
+  return {
+    ...DEFAULT_CONFIG,
+    overrides: [{ files, rules }],
+  };
+}
+
 describe("rule config support", () => {
   test("can disable a rule via config", async () => {
     const rootDir = await createTempRepo();
@@ -73,6 +83,81 @@ describe("rule config support", () => {
     const config = await loadConfig(rootDir);
 
     expect(config.ignores).toEqual(["src/comments.ts"]);
+  });
+
+  test("can apply a path-scoped file override", async () => {
+    const rootDir = await createTempRepo();
+    await writeFile(
+      path.join(rootDir, "src", "nested.ts"),
+      "// Add more validation if needed\nexport const nested = true;\n",
+    );
+
+    const result = await analyzeRepository(
+      rootDir,
+      withPathOverride(["src/comments.ts"], {
+        "comments.placeholder-comments": { enabled: false },
+      }),
+      createDefaultRegistry(),
+    );
+
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0]?.path).toBe("src/nested.ts");
+  });
+
+  test("can apply a path-scoped directory override", async () => {
+    const rootDir = await createTempRepo();
+
+    for (const dirName of ["src/rules/defensive", "src/other/defensive"]) {
+      for (let index = 0; index < 6; index += 1) {
+        await mkdir(path.join(rootDir, dirName), { recursive: true });
+        await writeFile(
+          path.join(rootDir, dirName, `file-${index}.ts`),
+          `export const value${index} = ${index};\n`,
+        );
+      }
+    }
+
+    const result = await analyzeRepository(
+      rootDir,
+      withPathOverride(["src/rules/**"], {
+        "structure.over-fragmentation": { enabled: false },
+      }),
+      createDefaultRegistry(),
+    );
+
+    const fragmentationFindings = result.findings.filter(
+      (finding) => finding.ruleId === "structure.over-fragmentation",
+    );
+
+    expect(fragmentationFindings.map((finding) => finding.path)).toEqual(["src/other/defensive"]);
+  });
+
+  test("loadConfig reads path-scoped overrides", async () => {
+    const rootDir = await createTempRepo();
+    await writeFile(
+      path.join(rootDir, "slop-scan.config.json"),
+      JSON.stringify({
+        overrides: [
+          {
+            files: ["src/comments.ts"],
+            rules: {
+              "comments.placeholder-comments": { enabled: false },
+            },
+          },
+        ],
+      }),
+    );
+
+    const config = await loadConfig(rootDir);
+
+    expect(config.overrides).toEqual([
+      {
+        files: ["src/comments.ts"],
+        rules: {
+          "comments.placeholder-comments": { enabled: false },
+        },
+      },
+    ]);
   });
 
   test("loadConfig falls back to repo-slop.config.json", async () => {

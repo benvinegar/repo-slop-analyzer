@@ -6,10 +6,16 @@ export interface RuleConfig {
   weight?: number;
 }
 
+export interface ConfigOverride {
+  files: string[];
+  rules: Record<string, RuleConfig>;
+}
+
 export interface AnalyzerConfig {
   ignores: string[];
   rules: Record<string, RuleConfig>;
   thresholds: Record<string, number>;
+  overrides: ConfigOverride[];
 }
 
 export const DEFAULT_CONFIG: AnalyzerConfig = {
@@ -23,6 +29,7 @@ export const DEFAULT_CONFIG: AnalyzerConfig = {
   ],
   rules: {},
   thresholds: {},
+  overrides: [],
 };
 
 function cloneConfig(config: AnalyzerConfig): AnalyzerConfig {
@@ -30,6 +37,10 @@ function cloneConfig(config: AnalyzerConfig): AnalyzerConfig {
     ignores: [...config.ignores],
     rules: { ...config.rules },
     thresholds: { ...config.thresholds },
+    overrides: config.overrides.map((override) => ({
+      files: [...override.files],
+      rules: { ...override.rules },
+    })),
   };
 }
 
@@ -61,5 +72,9 @@ export async function loadConfig(rootDir: string): Promise<AnalyzerConfig> {
     ignores: [...(parsed.ignores ?? DEFAULT_CONFIG.ignores)],
     rules: { ...(parsed.rules ?? DEFAULT_CONFIG.rules) },
     thresholds: { ...(parsed.thresholds ?? DEFAULT_CONFIG.thresholds) },
+    overrides: (parsed.overrides ?? DEFAULT_CONFIG.overrides).map((override) => ({
+      files: [...override.files],
+      rules: { ...override.rules },
+    })),
   };
 }
