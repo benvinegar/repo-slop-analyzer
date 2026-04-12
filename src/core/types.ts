@@ -66,6 +66,23 @@ export interface AnalysisSummary {
   normalized: NormalizedMetrics;
 }
 
+export interface ReportPluginMetadata {
+  namespace: string;
+  name: string;
+  version: string | null;
+  source: string;
+}
+
+export interface ReportMetadata {
+  schemaVersion: number;
+  tool: {
+    name: string;
+    version: string;
+  };
+  configHash: string;
+  plugins: ReportPluginMetadata[];
+}
+
 export interface AnalysisResult {
   rootDir: string;
   config: AnalyzerConfig;
@@ -77,6 +94,7 @@ export interface AnalysisResult {
   directoryScores: DirectoryScore[];
   /** Kept alongside summary for reporters that read it directly. */
   repoScore: number;
+  metadata?: ReportMetadata;
 }
 
 export interface LanguagePlugin {
