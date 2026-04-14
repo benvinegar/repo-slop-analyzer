@@ -20,6 +20,9 @@ const ALIAS_COMMENT_PATTERNS = [
  * comment. We only look one or two lines upward to keep the association tight
  * and avoid broad file-level exemptions.
  */
+/**
+ * Associates alias comments only when they are immediately adjacent so unrelated wrappers elsewhere in the file still count.
+ */
 function hasNearbyAliasComment(summary: FunctionSummary, comments: CommentSummary[]): boolean {
   return comments.some((comment) => {
     const lineDelta = summary.line - comment.line;

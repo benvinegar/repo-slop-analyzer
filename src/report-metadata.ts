@@ -9,6 +9,9 @@ export const REPORT_SCHEMA_VERSION = 2;
 export const TOOL_NAME = "slop-scan";
 export const TOOL_VERSION = typeof packageJson.version === "string" ? packageJson.version : "0.0.0";
 
+/**
+ * Sorts plugin metadata into a deterministic order so config hashes do not depend on load sequencing.
+ */
 function buildPluginMetadata(plugins: LoadedPlugin[]): ReportPluginMetadata[] {
   return plugins
     .map((plugin) => ({
@@ -26,6 +29,9 @@ function buildPluginMetadata(plugins: LoadedPlugin[]): ReportPluginMetadata[] {
     );
 }
 
+/**
+ * Pins delta compatibility to effective config and plugin inputs rather than filesystem details.
+ */
 export function createConfigHash(
   config: AnalyzerConfig,
   plugins: ReportPluginMetadata[] = [],
@@ -44,6 +50,9 @@ export function createConfigHash(
   );
 }
 
+/**
+ * Assembles the metadata contract shared by scan JSON and delta JSON.
+ */
 export function buildReportMetadata(
   config: AnalyzerConfig,
   plugins: LoadedPlugin[] = [],
@@ -62,6 +71,9 @@ export function buildReportMetadata(
   };
 }
 
+/**
+ * Backfills derived metadata when callers diff in-memory results or older reports missing newer fields.
+ */
 export function getReportMetadata(result: AnalysisResult): ReportMetadata {
   if (!result.metadata) {
     return buildReportMetadata(result.config);

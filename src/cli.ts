@@ -8,6 +8,9 @@ import { diffReports, formatDeltaText, parseFailOn, shouldFailDelta } from "./de
 import { loadConfigFile } from "./config";
 import { buildReportMetadata } from "./report-metadata";
 
+/**
+ * Keeps the help text centralized so scan/delta usage stays consistent across the CLI and tests.
+ */
 export function formatHelp(): string {
   return [
     "slop-scan",
@@ -56,10 +59,16 @@ export interface CliArgs {
   failOn?: string;
 }
 
+/**
+ * Accepts plain JSON-like objects when hydrating saved reports from disk.
+ */
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/**
+ * Executes a scan exactly as the CLI would, then attaches metadata needed by downstream delta consumers.
+ */
 async function scanTarget(targetPath: string, ignore: string[]): Promise<AnalysisResult> {
   const rootDir = path.resolve(targetPath);
   const loadedConfig = await loadConfigFile(rootDir);
@@ -79,6 +88,9 @@ async function scanTarget(targetPath: string, ignore: string[]): Promise<Analysi
   return result;
 }
 
+/**
+ * Hydrates a previously emitted scan report and rejects obviously unrelated JSON before diffing.
+ */
 async function readReport(reportPath: string): Promise<AnalysisResult> {
   const resolvedPath = path.resolve(reportPath);
   const raw = JSON.parse(await readFile(resolvedPath, "utf8")) as unknown;
@@ -90,6 +102,9 @@ async function readReport(reportPath: string): Promise<AnalysisResult> {
   return raw as AnalysisResult;
 }
 
+/**
+ * Normalizes the two delta input modes so the diff engine always receives in-memory reports.
+ */
 async function resolveDeltaInput(
   reportPath: string | undefined,
   targetPath: string | undefined,
@@ -111,6 +126,9 @@ async function resolveDeltaInput(
   throw new Error(`Pass either --${label} <path> or --${label}-report <file>.`);
 }
 
+/**
+ * Treats delta positionals as sugar over --base/--head while keeping scan strict about a single target.
+ */
 export function parseCliArgs(argv: string[]): CliArgs {
   const { values, positionals } = parseArgs({
     args: argv,
@@ -171,6 +189,9 @@ export function parseCliArgs(argv: string[]): CliArgs {
   };
 }
 
+/**
+ * Routes between scan and delta flows and keeps command-specific flag validation near the entrypoint.
+ */
 export async function run(argv: string[]): Promise<number> {
   const args = parseCliArgs(argv);
 

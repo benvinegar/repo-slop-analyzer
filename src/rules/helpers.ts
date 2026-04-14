@@ -18,14 +18,23 @@ export const BOUNDARY_WRAPPER_TARGET_PREFIXES = [
   "storage.",
 ];
 
+/**
+ * Returns zero instead of NaN so threshold math stays predictable on tiny repos and empty directories.
+ */
 export function ratio(count: number, total: number): number {
   return total === 0 ? 0 : count / total;
 }
 
+/**
+ * Keeps rule code declarative when several heuristics need the same count-by-predicate shape.
+ */
 export function countMatching<T>(values: T[], predicate: (value: T) => boolean): number {
   return values.reduce((total, value) => total + (predicate(value) ? 1 : 0), 0);
 }
 
+/**
+ * Uses a zero default because missing context is weak evidence, not an exceptional condition, in these heuristics.
+ */
 export function average(values: number[]): number {
   if (values.length === 0) {
     return 0;
@@ -34,12 +43,18 @@ export function average(values: number[]): number {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
+/**
+ * Makes text fingerprints insensitive to indentation and incidental spacing differences.
+ */
 export function normalizeWhitespace(value: string): string {
   const trimmed = value.trim();
   const collapsed = trimmed.replace(/\s+/g, " ");
   return collapsed.toLowerCase();
 }
 
+/**
+ * Distinguishes repeated identical keys in one file without letting incidental traversal order leak into hashes.
+ */
 export function assignStableOrdinals<T>(
   values: T[],
   keyOf: (value: T) => string,
@@ -57,6 +72,9 @@ export function assignStableOrdinals<T>(
     });
 }
 
+/**
+ * Uses the median for sibling baselines so one unusually wide directory does not flatten the whole comparison.
+ */
 export function median(values: number[]): number {
   if (values.length === 0) {
     return 0;

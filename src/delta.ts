@@ -134,6 +134,9 @@ export interface DeltaReport {
   rules: DeltaRuleSummary[];
 }
 
+/**
+ * Provides a stable severity ordering for deterministic sorting and delta classification.
+ */
 function severityRank(severity: Finding["severity"]): number {
   switch (severity) {
     case "weak":
@@ -145,6 +148,9 @@ function severityRank(severity: Finding["severity"]): number {
   }
 }
 
+/**
+ * Orders locations by path then position so grouped findings render predictably across scans.
+ */
 function compareLocations(left: FindingLocation, right: FindingLocation): number {
   return (
     left.path.localeCompare(right.path) ||
@@ -153,6 +159,9 @@ function compareLocations(left: FindingLocation, right: FindingLocation): number
   );
 }
 
+/**
+ * Keeps missing locations after concrete ones when sorting mixed synthetic and file-backed occurrences.
+ */
 function compareOptionalLocations(
   left: FindingLocation | null,
   right: FindingLocation | null,
@@ -172,6 +181,9 @@ function compareOptionalLocations(
   return compareLocations(left, right);
 }
 
+/**
+ * Collapses duplicate locations because grouped findings can project the same line multiple times.
+ */
 function uniqueSortedLocations(finding: Finding): FindingLocation[] {
   const fallbackPath = finding.path ?? null;
   const fallbackLocations = fallbackPath
@@ -197,6 +209,9 @@ function uniqueSortedLocations(finding: Finding): FindingLocation[] {
   });
 }
 
+/**
+ * Sorts fallback occurrences deterministically so older reports stay diffable even without explicit fingerprints.
+ */
 function compareOccurrences(left: FindingOccurrence, right: FindingOccurrence): number {
   return (
     compareOptionalLocations(left.primaryLocation, right.primaryLocation) ||
@@ -207,6 +222,9 @@ function compareOccurrences(left: FindingOccurrence, right: FindingOccurrence): 
   );
 }
 
+/**
+ * Generates a deterministic fallback fingerprint when a rule has not opted into explicit delta identities yet.
+ */
 function occurrenceFingerprint(occurrence: FindingOccurrence, index: number): string {
   return JSON.stringify({
     scope: occurrence.scope,
@@ -216,6 +234,9 @@ function occurrenceFingerprint(occurrence: FindingOccurrence, index: number): st
   });
 }
 
+/**
+ * Captures the occurrence payload exposed in delta JSON without retaining full finding objects.
+ */
 function toOccurrenceSnapshot(occurrence: FindingOccurrence): DeltaOccurrenceSnapshot {
   return {
     fingerprint: occurrence.fingerprint,
@@ -234,6 +255,9 @@ function toOccurrenceSnapshot(occurrence: FindingOccurrence): DeltaOccurrenceSna
   };
 }
 
+/**
+ * Explodes rule-supplied delta identities into per-occurrence records while reusing location data when possible.
+ */
 function buildExplicitFindingOccurrences(finding: Finding): FindingOccurrence[] {
   if (!finding.deltaIdentity || finding.deltaIdentity.occurrences.length === 0) {
     return [];
@@ -276,6 +300,9 @@ function buildExplicitFindingOccurrences(finding: Finding): FindingOccurrence[] 
   });
 }
 
+/**
+ * Prefers explicit fingerprints but falls back to path-scoped heuristic occurrences so older reports remain comparable.
+ */
 export function buildFindingOccurrences(
   report: AnalysisResult | null | undefined,
 ): FindingOccurrence[] {
@@ -343,6 +370,9 @@ export function buildFindingOccurrences(
   return ordered;
 }
 
+/**
+ * Collects occurrences by their matching key so grouped findings can be compared one slot at a time.
+ */
 function groupOccurrencesByIdentity(report: AnalysisResult) {
   const grouped = new Map<string, FindingOccurrence[]>();
 
@@ -355,6 +385,9 @@ function groupOccurrencesByIdentity(report: AnalysisResult) {
   return grouped;
 }
 
+/**
+ * Treats score changes as primary, then severity/location drift as secondary signals for matched occurrences.
+ */
 function classifyPairedOccurrence(
   baseOccurrence: FindingOccurrence,
   headOccurrence: FindingOccurrence,
@@ -378,6 +411,9 @@ function classifyPairedOccurrence(
   return null;
 }
 
+/**
+ * Keeps terminal and JSON consumers stable by ordering the highest-priority statuses and strongest findings first.
+ */
 function compareChanges(left: DeltaChange, right: DeltaChange): number {
   const statusOrder: Record<DeltaStatus, number> = {
     added: 0,
@@ -400,6 +436,9 @@ function compareChanges(left: DeltaChange, right: DeltaChange): number {
   );
 }
 
+/**
+ * Surfaces metadata mismatches that can make a delta semantically noisy even when diffing still succeeds.
+ */
 function buildWarnings(baseMetadata: ReportMetadata, headMetadata: ReportMetadata): DeltaWarning[] {
   const warnings: DeltaWarning[] = [];
 
@@ -434,6 +473,9 @@ function buildWarnings(baseMetadata: ReportMetadata, headMetadata: ReportMetadat
   return warnings;
 }
 
+/**
+ * Uses top-level finding paths so path score deltas stay aligned with scan output rather than exploded occurrences.
+ */
 function buildPathScoreMap(report: AnalysisResult): Map<string, number> {
   const scores = new Map<string, number>();
 
@@ -448,6 +490,9 @@ function buildPathScoreMap(report: AnalysisResult): Map<string, number> {
   return scores;
 }
 
+/**
+ * Aggregates by rule so dashboards can quickly spot which heuristic is driving most delta churn.
+ */
 function buildRuleSummaries(changes: DeltaChange[]): DeltaRuleSummary[] {
   const grouped = new Map<string, DeltaRuleSummary>();
 
@@ -487,6 +532,9 @@ function buildRuleSummaries(changes: DeltaChange[]): DeltaRuleSummary[] {
   );
 }
 
+/**
+ * Compares two reports at occurrence granularity and preserves enough metadata for downstream tools to sanity-check the result.
+ */
 export function diffReports(baseReport: AnalysisResult, headReport: AnalysisResult): DeltaReport {
   const baseMetadata = getReportMetadata(baseReport);
   const headMetadata = getReportMetadata(headReport);
@@ -635,22 +683,37 @@ export function diffReports(baseReport: AnalysisResult, headReport: AnalysisResu
   };
 }
 
+/**
+ * Keeps the text formatter compact without pulling a full inflection helper into the CLI bundle.
+ */
 function pluralize(count: number, singular: string, plural = `${singular}s`): string {
   return `${count} ${count === 1 ? singular : plural}`;
 }
 
+/**
+ * Makes count deltas visually directional in text output.
+ */
 function formatSignedInteger(value: number): string {
   return `${value > 0 ? "+" : ""}${value}`;
 }
 
+/**
+ * Mirrors numeric score drift in the same signed style used for count deltas.
+ */
 function formatSignedScore(value: number): string {
   return `${value > 0 ? "+" : ""}${value.toFixed(2)}`;
 }
 
+/**
+ * Normalizes one location to the compact line:column form used throughout text output.
+ */
 function formatLocation(location: FindingLocation): string {
   return `${location.line}:${location.column ?? 1}`;
 }
 
+/**
+ * Shows only a short location preview so grouped findings stay readable in CI logs.
+ */
 function formatLocationsInline(snapshot: DeltaOccurrenceSnapshot | null): string {
   if (!snapshot || snapshot.locations.length === 0) {
     return "";
@@ -664,6 +727,9 @@ function formatLocationsInline(snapshot: DeltaOccurrenceSnapshot | null): string
     : ` @ ${preview.join(", ")}`;
 }
 
+/**
+ * Formats one occurrence change while still surfacing score drift for matched base/head pairs.
+ */
 function formatChangeLine(change: DeltaChange): string {
   const snapshot = change.head ?? change.base;
   const scoreSuffix =
@@ -674,6 +740,9 @@ function formatChangeLine(change: DeltaChange): string {
   return `  - ${change.status}  ${snapshot?.severity ?? "medium"}  ${snapshot?.message ?? change.ruleId}  ${change.ruleId}${formatLocationsInline(snapshot)}${scoreSuffix}`;
 }
 
+/**
+ * Produces a CI-friendly summary that surfaces metadata warnings before file-level detail.
+ */
 export function formatDeltaText(delta: DeltaReport): string {
   const lines = [
     "slop-scan delta",
@@ -733,6 +802,9 @@ export function formatDeltaText(delta: DeltaReport): string {
   return lines.join("\n");
 }
 
+/**
+ * Parses the comma-separated policy list once so CLI flags and library callers share validation.
+ */
 export function parseFailOn(value: string): DeltaFailOn[] {
   const rawValues = value
     .split(",")
@@ -762,6 +834,9 @@ export function parseFailOn(value: string): DeltaFailOn[] {
   return failOn;
 }
 
+/**
+ * Evaluates exit-code policy against the aggregated summary instead of re-walking the full change list.
+ */
 export function shouldFailDelta(delta: DeltaReport, failOn: DeltaFailOn[]): boolean {
   if (failOn.length === 0) {
     return false;

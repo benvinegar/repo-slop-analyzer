@@ -1,6 +1,9 @@
 import path from "node:path";
 import * as ts from "typescript";
 
+/**
+ * Matches parser mode to the supported JS/TS extensions used throughout repository scans.
+ */
 export function getScriptKind(filePath: string): ts.ScriptKind {
   switch (path.extname(filePath)) {
     case ".tsx":
@@ -19,16 +22,25 @@ export function getScriptKind(filePath: string): ts.ScriptKind {
   }
 }
 
+/**
+ * Switches into JSX mode only when angle-bracket parsing would otherwise be ambiguous.
+ */
 function getLanguageVariant(filePath: string): ts.LanguageVariant {
   return filePath.endsWith(".tsx") || filePath.endsWith(".jsx")
     ? ts.LanguageVariant.JSX
     : ts.LanguageVariant.Standard;
 }
 
+/**
+ * Centralizes the 0-based to 1-based conversion so diagnostics and tests agree on line numbering.
+ */
 export function getLineNumber(sourceFile: ts.SourceFile, position: number): number {
   return sourceFile.getLineAndCharacterOfPosition(position).line + 1;
 }
 
+/**
+ * Counts newline boundaries directly so raw size metrics do not need AST work.
+ */
 export function countPhysicalLines(text: string): number {
   if (text.length === 0) {
     return 0;
@@ -44,6 +56,9 @@ export function countPhysicalLines(text: string): number {
   return lines;
 }
 
+/**
+ * Counts the first token on each source line so comments and blank lines do not inflate density metrics.
+ */
 export function countLogicalLines(text: string, filePath: string): number {
   const scanner = ts.createScanner(
     ts.ScriptTarget.Latest,
@@ -84,11 +99,17 @@ export function countLogicalLines(text: string, filePath: string): number {
   return logicalLineCount;
 }
 
+/**
+ * Provides a tiny depth-first traversal primitive shared by facts and heuristics.
+ */
 export function walk(node: ts.Node, visit: (node: ts.Node) => void): void {
   visit(node);
   node.forEachChild((child) => walk(child, visit));
 }
 
+/**
+ * Uses the shared walker so duplication heuristics can gate expensive fingerprints on AST size.
+ */
 export function countNodes(node: ts.Node): number {
   let count = 0;
   walk(node, () => {
@@ -97,6 +118,9 @@ export function countNodes(node: ts.Node): number {
   return count;
 }
 
+/**
+ * Encodes the repo's broad test-file conventions so rules can relax or specialize consistently.
+ */
 export function isTestFile(filePath: string): boolean {
   return (
     filePath.includes("/__tests__/") ||
@@ -107,9 +131,15 @@ export function isTestFile(filePath: string): boolean {
   );
 }
 
+/**
+ * Builds a shallow structural sketch suitable for setup/mock fingerprints without requiring semantic analysis.
+ */
 export function fingerprintNodeShape(node: ts.Node, maxDepth = 4): string {
   const parts: string[] = [];
 
+  /**
+   * Stops descending after maxDepth so these shape fingerprints stay cheap and stable.
+   */
   function visit(current: ts.Node, depth: number): void {
     const label = ts.SyntaxKind[current.kind];
     if (depth >= maxDepth) {
@@ -143,10 +173,16 @@ export function fingerprintNodeShape(node: ts.Node, maxDepth = 4): string {
   return parts.join("");
 }
 
+/**
+ * Normalizes empty-body handling for heuristics that score wrappers by body size.
+ */
 export function getNodeStatementCount(node: ts.Block | undefined): number {
   return node?.statements.length ?? 0;
 }
 
+/**
+ * Falls back to a synthetic name so diagnostics can still refer to anonymous wrappers predictably.
+ */
 export function getFunctionName(
   node: ts.FunctionLikeDeclarationBase,
   sourceFile: ts.SourceFile,
@@ -165,6 +201,9 @@ export function getFunctionName(
   return `<anonymous:${getLineNumber(sourceFile, node.getStart(sourceFile))}>`;
 }
 
+/**
+ * Anchors nested fingerprints to the nearest callable scope so try/catch identities survive line drift.
+ */
 export function getEnclosingFunctionName(node: ts.Node, sourceFile: ts.SourceFile): string {
   let current: ts.Node | undefined = node.parent;
 
@@ -179,6 +218,9 @@ export function getEnclosingFunctionName(node: ts.Node, sourceFile: ts.SourceFil
   return "<top-level>";
 }
 
+/**
+ * Distinguishes genuinely asynchronous work from signature-only async wrappers.
+ */
 export function hasAwaitExpression(node: ts.Node): boolean {
   let found = false;
   walk(node, (nextNode) => {
@@ -189,6 +231,9 @@ export function hasAwaitExpression(node: ts.Node): boolean {
   return found;
 }
 
+/**
+ * Treats console/logger symmetry as the baseline logging signal used by catch-oriented heuristics.
+ */
 export function isLoggingCall(expression: ts.Expression): boolean {
   if (!ts.isCallExpression(expression) || !ts.isPropertyAccessExpression(expression.expression)) {
     return false;
@@ -198,6 +243,9 @@ export function isLoggingCall(expression: ts.Expression): boolean {
   return targetText === "console" || targetText === "logger";
 }
 
+/**
+ * Strips TypeScript-only wrapper nodes so structural checks can reason about the underlying expression.
+ */
 export function unwrapExpression(expression: ts.Expression): ts.Expression {
   if (
     ts.isParenthesizedExpression(expression) ||
@@ -214,6 +262,9 @@ export function unwrapExpression(expression: ts.Expression): ts.Expression {
   return expression;
 }
 
+/**
+ * Turns property and call chains into stable dotted paths for boundary detection and wrapper fingerprints.
+ */
 export function getExpressionPath(expression: ts.Expression): string[] {
   const unwrapped = unwrapExpression(expression);
 
@@ -244,6 +295,9 @@ export function getExpressionPath(expression: ts.Expression): string[] {
   return [];
 }
 
+/**
+ * Recognizes the small set of fallback literals that usually hide failures inside catches.
+ */
 export function isDefaultLiteral(expression: ts.Expression | undefined): boolean {
   if (!expression) {
     return true;

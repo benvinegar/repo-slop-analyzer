@@ -1,5 +1,8 @@
 import { createHash } from "node:crypto";
 
+/**
+ * Serializes plain data with sorted keys so hashes stay stable across object construction order.
+ */
 export function stableSerialize(value: unknown): string {
   if (value === null) {
     return "null";
@@ -34,6 +37,9 @@ export function stableSerialize(value: unknown): string {
   }
 }
 
+/**
+ * Truncates SHA-256 to a compact identifier while keeping enough entropy for report metadata and fingerprints.
+ */
 export function stableHash(value: unknown, length = 16): string {
   return createHash("sha256").update(stableSerialize(value)).digest("hex").slice(0, length);
 }

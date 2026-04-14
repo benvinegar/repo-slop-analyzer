@@ -10,6 +10,9 @@ import {
 } from "../src/delta";
 import type { AnalysisResult } from "../src/core/types";
 
+/**
+ * Provides a hand-built baseline report so delta tests can exercise explicit fingerprints without fixture scans.
+ */
 function createBaseResult(): AnalysisResult {
   return {
     rootDir: "/tmp/example",
@@ -114,6 +117,9 @@ function createBaseResult(): AnalysisResult {
   };
 }
 
+/**
+ * Builds the follow-up report where the duplicate cluster grows and a placeholder finding appears.
+ */
 function createHeadResult(): AnalysisResult {
   return {
     rootDir: "/tmp/example",

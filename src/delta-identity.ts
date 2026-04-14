@@ -11,6 +11,9 @@ export interface DeltaIdentityDescriptor {
   column?: number;
 }
 
+/**
+ * Canonicalizes descriptor ordering so equivalent rule output hashes to the same fingerprint set.
+ */
 function compareDescriptors(left: DeltaIdentityDescriptor, right: DeltaIdentityDescriptor): number {
   return (
     (left.path ?? "").localeCompare(right.path ?? "") ||
@@ -22,6 +25,9 @@ function compareDescriptors(left: DeltaIdentityDescriptor, right: DeltaIdentityD
   );
 }
 
+/**
+ * Produces a cluster-level fingerprint that can survive message churn when the same group grows or shrinks.
+ */
 export function createDeltaGroupFingerprint(ruleId: string, groupKey: unknown): string {
   return `${ruleId}:group:${stableHash(
     {
@@ -33,6 +39,9 @@ export function createDeltaGroupFingerprint(ruleId: string, groupKey: unknown): 
   )}`;
 }
 
+/**
+ * Produces the concrete occurrence fingerprint consumed by report-to-report diffing.
+ */
 export function createDeltaOccurrenceFingerprint(ruleId: string, occurrenceKey: unknown): string {
   return `${ruleId}:occ:${stableHash(
     {
@@ -44,6 +53,9 @@ export function createDeltaOccurrenceFingerprint(ruleId: string, occurrenceKey: 
   )}`;
 }
 
+/**
+ * Deduplicates rule-supplied descriptors and emits the stable occurrence payload stored alongside a finding.
+ */
 export function createFindingDeltaIdentity(
   ruleId: string,
   descriptors: DeltaIdentityDescriptor[],

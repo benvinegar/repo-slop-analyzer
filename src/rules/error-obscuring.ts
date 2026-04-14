@@ -9,6 +9,9 @@ import {
   scoreTryCatch,
 } from "./try-catch-rule-helpers";
 
+/**
+ * Keeps evidence strings and fingerprints aligned on the same catch-transformation categories.
+ */
 function obscuringKind(summary: TryCatchSummary): string {
   if (summary.catchHasLogging && summary.catchHasDefaultReturn) {
     return "log+default";
