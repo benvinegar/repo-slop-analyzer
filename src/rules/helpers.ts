@@ -1,3 +1,5 @@
+import type { DeltaIdentityDescriptor } from "../delta-identity";
+
 // These segments are intentionally conservative. The goal is to recognize common
 // asset buckets like icon packs without teaching the analyzer that arbitrary
 // directories full of tiny files are always harmless.
@@ -70,6 +72,23 @@ export function assignStableOrdinals<T>(
       counts.set(key, ordinal);
       return { value, ordinal };
     });
+}
+
+/**
+ * Packages the common "same-file occurrence with stable ordinal" pattern used by several rule fingerprints.
+ */
+export function buildFileOrdinalDeltaDescriptors<T>(
+  filePath: string,
+  values: T[],
+  keyOf: (value: T) => string,
+  lineOf: (value: T) => number,
+  occurrenceKeyOf: (value: T, ordinal: number) => unknown,
+): DeltaIdentityDescriptor[] {
+  return assignStableOrdinals(values, keyOf, lineOf).map(({ value, ordinal }) => ({
+    path: filePath,
+    line: lineOf(value),
+    occurrenceKey: occurrenceKeyOf(value, ordinal),
+  }));
 }
 
 /**

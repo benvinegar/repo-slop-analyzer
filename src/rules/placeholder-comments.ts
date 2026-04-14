@@ -1,7 +1,7 @@
 import { createFindingDeltaIdentity } from "../delta-identity";
 import type { RulePlugin } from "../core/types";
 import type { CommentSummary } from "../facts/types";
-import { assignStableOrdinals, normalizeWhitespace } from "./helpers";
+import { buildFileOrdinalDeltaDescriptors, normalizeWhitespace } from "./helpers";
 
 /**
  * Flags filler comments that gesture at future work without explaining current
@@ -40,19 +40,17 @@ export const placeholderCommentsRule: RulePlugin = {
       return [];
     }
 
-    const deltaOccurrences = assignStableOrdinals(
+    const deltaOccurrences = buildFileOrdinalDeltaDescriptors(
+      context.file!.path,
       matches,
       (match) => normalizeWhitespace(match.text),
       (match) => match.line,
-    ).map(({ value, ordinal }) => ({
-      path: context.file!.path,
-      line: value.line,
-      occurrenceKey: {
+      (match, ordinal) => ({
         path: context.file!.path,
-        normalizedText: normalizeWhitespace(value.text),
+        normalizedText: normalizeWhitespace(match.text),
         ordinal,
-      },
-    }));
+      }),
+    );
 
     return [
       {

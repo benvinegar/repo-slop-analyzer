@@ -1,7 +1,7 @@
 import { createFindingDeltaIdentity } from "../delta-identity";
 import type { RulePlugin } from "../core/types";
 import type { FunctionSummary } from "../facts/types";
-import { BOUNDARY_WRAPPER_TARGET_PREFIXES, assignStableOrdinals } from "./helpers";
+import { BOUNDARY_WRAPPER_TARGET_PREFIXES, buildFileOrdinalDeltaDescriptors } from "./helpers";
 
 /**
  * Flags async-related ceremony that adds little value:
@@ -59,7 +59,8 @@ export const asyncNoiseRule: RulePlugin = {
       4,
       redundantReturnAwait.length * 1.5 + asyncPassThroughWrappers.length * 0.75,
     );
-    const deltaOccurrences = assignStableOrdinals(
+    const deltaOccurrences = buildFileOrdinalDeltaDescriptors(
+      context.file!.path,
       noisy,
       ({ summary, kind }) =>
         JSON.stringify({
@@ -70,19 +71,16 @@ export const asyncNoiseRule: RulePlugin = {
           statementCount: summary.statementCount,
         }),
       ({ summary }) => summary.line,
-    ).map(({ value, ordinal }) => ({
-      path: context.file!.path,
-      line: value.summary.line,
-      occurrenceKey: {
+      ({ summary, kind }, ordinal) => ({
         path: context.file!.path,
-        kind: value.kind,
-        name: value.summary.name,
-        parameterCount: value.summary.parameterCount,
-        passThroughTarget: value.summary.passThroughTarget,
-        statementCount: value.summary.statementCount,
+        kind,
+        name: summary.name,
+        parameterCount: summary.parameterCount,
+        passThroughTarget: summary.passThroughTarget,
+        statementCount: summary.statementCount,
         ordinal,
-      },
-    }));
+      }),
+    );
 
     return [
       {

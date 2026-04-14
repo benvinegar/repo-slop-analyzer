@@ -1,4 +1,4 @@
-import { createFindingDeltaIdentity } from "../delta-identity";
+import { createPathDeltaIdentity } from "../delta-identity";
 import type { RulePlugin } from "../core/types";
 import type { ExportSummary } from "../facts/types";
 
@@ -42,13 +42,7 @@ export const barrelDensityRule: RulePlugin = {
         // catastrophic file-level failure.
         score: Math.min(3, 1 + summary.reExportCount * 0.5),
         locations: [{ path: context.file!.path, line: 1 }],
-        deltaIdentity: createFindingDeltaIdentity("structure.barrel-density", [
-          {
-            path: context.file!.path,
-            line: 1,
-            occurrenceKey: { path: context.file!.path },
-          },
-        ]),
+        deltaIdentity: createPathDeltaIdentity("structure.barrel-density", context.file!.path),
       },
     ];
   },

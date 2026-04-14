@@ -97,3 +97,20 @@ export function createFindingDeltaIdentity(
     occurrences,
   };
 }
+
+/**
+ * Covers the common case where one finding maps to one stable path-local occurrence.
+ */
+export function createPathDeltaIdentity(
+  ruleId: string,
+  path: string,
+  line = 1,
+): FindingDeltaIdentity {
+  return createFindingDeltaIdentity(ruleId, [
+    {
+      path,
+      line,
+      occurrenceKey: { path },
+    },
+  ]);
+}

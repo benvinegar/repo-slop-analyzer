@@ -1,7 +1,7 @@
 import { createFindingDeltaIdentity } from "../delta-identity";
 import type { RulePlugin } from "../core/types";
 import type { TryCatchSummary } from "../facts/types";
-import { assignStableOrdinals } from "./helpers";
+import { buildFileOrdinalDeltaDescriptors } from "./helpers";
 import {
   buildTryCatchIdentityBase,
   formatTryCatchBoundary,
@@ -57,7 +57,8 @@ export const errorObscuringRule: RulePlugin = {
       return [];
     }
 
-    const deltaOccurrences = assignStableOrdinals(
+    const deltaOccurrences = buildFileOrdinalDeltaDescriptors(
+      context.file!.path,
       flagged,
       (summary) =>
         JSON.stringify({
@@ -65,16 +66,13 @@ export const errorObscuringRule: RulePlugin = {
           kind: obscuringKind(summary),
         }),
       (summary) => summary.line,
-    ).map(({ value, ordinal }) => ({
-      path: context.file!.path,
-      line: value.line,
-      occurrenceKey: {
+      (summary, ordinal) => ({
         path: context.file!.path,
-        kind: obscuringKind(value),
-        ...buildTryCatchIdentityBase(value),
+        kind: obscuringKind(summary),
+        ...buildTryCatchIdentityBase(summary),
         ordinal,
-      },
-    }));
+      }),
+    );
 
     return [
       {

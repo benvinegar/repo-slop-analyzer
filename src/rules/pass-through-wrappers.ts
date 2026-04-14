@@ -1,7 +1,7 @@
 import { createFindingDeltaIdentity } from "../delta-identity";
 import type { RulePlugin } from "../core/types";
 import type { CommentSummary, FunctionSummary } from "../facts/types";
-import { BOUNDARY_WRAPPER_TARGET_PREFIXES, assignStableOrdinals } from "./helpers";
+import { BOUNDARY_WRAPPER_TARGET_PREFIXES, buildFileOrdinalDeltaDescriptors } from "./helpers";
 
 // Nearby wording like "alias" or "backward compatibility" usually means the
 // wrapper exists to preserve an API name rather than because the author lazily
@@ -15,11 +15,6 @@ const ALIAS_COMMENT_PATTERNS = [
   /keep\s+the\s+old\s+name/i,
 ];
 
-/**
- * Returns true when the wrapper is immediately preceded by a compatibility
- * comment. We only look one or two lines upward to keep the association tight
- * and avoid broad file-level exemptions.
- */
 /**
  * Associates alias comments only when they are immediately adjacent so unrelated wrappers elsewhere in the file still count.
  */
@@ -74,7 +69,8 @@ export const passThroughWrappersRule: RulePlugin = {
       return [];
     }
 
-    const deltaOccurrences = assignStableOrdinals(
+    const deltaOccurrences = buildFileOrdinalDeltaDescriptors(
+      context.file!.path,
       wrappers,
       (summary) =>
         JSON.stringify({
@@ -84,18 +80,15 @@ export const passThroughWrappersRule: RulePlugin = {
           statementCount: summary.statementCount,
         }),
       (summary) => summary.line,
-    ).map(({ value, ordinal }) => ({
-      path: context.file!.path,
-      line: value.line,
-      occurrenceKey: {
+      (summary, ordinal) => ({
         path: context.file!.path,
-        name: value.name,
-        parameterCount: value.parameterCount,
-        passThroughTarget: value.passThroughTarget,
-        statementCount: value.statementCount,
+        name: summary.name,
+        parameterCount: summary.parameterCount,
+        passThroughTarget: summary.passThroughTarget,
+        statementCount: summary.statementCount,
         ordinal,
-      },
-    }));
+      }),
+    );
 
     return [
       {
