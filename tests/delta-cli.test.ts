@@ -1,6 +1,7 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { describe, expect, test } from "bun:test";
 import { DEFAULT_CONFIG, loadConfigFile } from "../src/config";
 import { analyzeRepository } from "../src/core/engine";
@@ -11,6 +12,7 @@ import { buildReportMetadata } from "../src/report-metadata";
 
 const CLEAN_FIXTURE = path.join(process.cwd(), "tests", "fixtures", "repos", "clean");
 const SLOP_FIXTURE = path.join(process.cwd(), "tests", "fixtures", "repos", "slop-heavy");
+const SAVED_DELTA_FIXTURE = path.join(process.cwd(), "tests", "fixtures", "reports", "saved-delta");
 
 describe("delta CLI", () => {
   test("parseCliArgs extracts delta flags and defaults head to the current directory", () => {
@@ -85,5 +87,32 @@ describe("delta CLI", () => {
     } finally {
       await rm(tempDir, { recursive: true, force: true });
     }
+  });
+
+  test("delta command matches the saved-report JSON snapshot", async () => {
+    const basePath = path.join(SAVED_DELTA_FIXTURE, "base.json");
+    const headPath = path.join(SAVED_DELTA_FIXTURE, "head.json");
+    const expectedPath = path.join(SAVED_DELTA_FIXTURE, "expected-delta.json");
+    const expectedJson = JSON.parse(await readFile(expectedPath, "utf8"));
+
+    const output = spawnSync(
+      "bun",
+      [
+        "run",
+        "src/cli.ts",
+        "delta",
+        "--base-report",
+        basePath,
+        "--head-report",
+        headPath,
+        "--json",
+      ],
+      {
+        encoding: "utf8",
+      },
+    );
+
+    expect(output.status).toBe(0);
+    expect(JSON.parse(output.stdout)).toEqual(expectedJson);
   });
 });
