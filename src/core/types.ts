@@ -1,4 +1,5 @@
 import type { AnalyzerConfig, ResolvedRuleConfig } from "../config";
+import type { DeltaStrategy } from "../rule-delta";
 
 export type Scope = "file" | "directory" | "repo";
 
@@ -22,6 +23,19 @@ export interface FindingLocation {
   column?: number;
 }
 
+export interface FindingDeltaOccurrenceIdentity {
+  fingerprint: string;
+  groupFingerprint?: string;
+  path?: string;
+  line?: number;
+  column?: number;
+}
+
+export interface FindingDeltaIdentity {
+  fingerprintVersion: number;
+  occurrences: FindingDeltaOccurrenceIdentity[];
+}
+
 export interface Finding {
   ruleId: string;
   family: string;
@@ -32,6 +46,23 @@ export interface Finding {
   score: number;
   locations: FindingLocation[];
   path?: string;
+  deltaIdentity?: FindingDeltaIdentity;
+}
+
+export interface DeltaKey {
+  /** Stable semantic key for one occurrence, supplied directly by the rule when path/line matching is not enough. */
+  key: string;
+  /** Optional stable cluster key shared by related occurrences. */
+  group?: string;
+  /** Optional display location carried through into delta output. */
+  path?: string;
+  line?: number;
+  column?: number;
+}
+
+export interface RuleFinding extends Finding {
+  /** Lightweight semantic escape hatch for clustered rules; stripped before findings are stored in reports. */
+  deltaKeys?: DeltaKey[];
 }
 
 export interface FileScore {
@@ -66,6 +97,24 @@ export interface AnalysisSummary {
   normalized: NormalizedMetrics;
 }
 
+export interface ReportPluginMetadata {
+  namespace: string;
+  name: string;
+  version: string | null;
+  source: string;
+}
+
+export interface ReportMetadata {
+  schemaVersion: number;
+  tool: {
+    name: string;
+    version: string;
+  };
+  configHash: string;
+  findingFingerprintVersion: number;
+  plugins: ReportPluginMetadata[];
+}
+
 export interface AnalysisResult {
   rootDir: string;
   config: AnalyzerConfig;
@@ -77,6 +126,7 @@ export interface AnalysisResult {
   directoryScores: DirectoryScore[];
   /** Kept alongside summary for reporters that read it directly. */
   repoScore: number;
+  metadata?: ReportMetadata;
 }
 
 export interface LanguagePlugin {
@@ -101,7 +151,9 @@ export interface FactProvider extends ProviderBase {
 export interface RulePlugin extends ProviderBase {
   family: string;
   severity: "strong" | "medium" | "weak";
-  evaluate(context: ProviderContext): Promise<Finding[]> | Finding[];
+  /** Optional matching policy used when the rule does not set deltaIdentity or semantic deltaKeys explicitly. */
+  delta?: DeltaStrategy;
+  evaluate(context: ProviderContext): Promise<RuleFinding[]> | RuleFinding[];
 }
 
 export interface ReporterPlugin {

@@ -1,0 +1,127 @@
+{
+  "metadata": {
+    "schemaVersion": 2,
+    "tool": {
+      "name": "slop-scan",
+      "version": "0.2.0"
+    },
+    "configHash": "fixture-config",
+    "findingFingerprintVersion": 1,
+    "plugins": []
+  },
+  "rootDir": "/fixture/head",
+  "config": {
+    "ignores": [],
+    "rules": {},
+    "thresholds": {},
+    "overrides": []
+  },
+  "summary": {
+    "fileCount": 2,
+    "directoryCount": 1,
+    "findingCount": 2,
+    "repoScore": 3.75,
+    "physicalLineCount": 16,
+    "logicalLineCount": 12,
+    "functionCount": 1,
+    "normalized": {
+      "scorePerFile": 1.875,
+      "scorePerKloc": 312.5,
+      "scorePerFunction": 3.75,
+      "findingsPerFile": 1,
+      "findingsPerKloc": 166.66666666666666,
+      "findingsPerFunction": 2
+    }
+  },
+  "files": [
+    {
+      "path": "src/service.ts",
+      "extension": ".ts",
+      "lineCount": 10,
+      "languageId": "javascript-like"
+    },
+    {
+      "path": "src/comments.ts",
+      "extension": ".ts",
+      "lineCount": 6,
+      "languageId": "javascript-like"
+    }
+  ],
+  "directories": [
+    {
+      "path": "src",
+      "filePaths": ["src/comments.ts", "src/service.ts"]
+    }
+  ],
+  "findings": [
+    {
+      "ruleId": "structure.pass-through-wrappers",
+      "family": "structure",
+      "severity": "medium",
+      "scope": "file",
+      "message": "Found 1 pass-through wrapper",
+      "evidence": ["fetchUser at line 3 -> api.getUser"],
+      "score": 3,
+      "path": "src/service.ts",
+      "locations": [
+        {
+          "path": "src/service.ts",
+          "line": 3,
+          "column": 1
+        }
+      ],
+      "deltaIdentity": {
+        "fingerprintVersion": 1,
+        "occurrences": [
+          {
+            "fingerprint": "structure.pass-through-wrappers:occ:fixture-wrapper",
+            "path": "src/service.ts",
+            "line": 3,
+            "column": 1
+          }
+        ]
+      }
+    },
+    {
+      "ruleId": "comments.placeholder-comments",
+      "family": "comments",
+      "severity": "weak",
+      "scope": "file",
+      "message": "Found 1 placeholder-style comments",
+      "evidence": ["// TODO: revisit edge cases"],
+      "score": 0.75,
+      "path": "src/comments.ts",
+      "locations": [
+        {
+          "path": "src/comments.ts",
+          "line": 1,
+          "column": 1
+        }
+      ],
+      "deltaIdentity": {
+        "fingerprintVersion": 1,
+        "occurrences": [
+          {
+            "fingerprint": "comments.placeholder-comments:occ:fixture-comment",
+            "path": "src/comments.ts",
+            "line": 1,
+            "column": 1
+          }
+        ]
+      }
+    }
+  ],
+  "fileScores": [
+    {
+      "path": "src/service.ts",
+      "score": 3,
+      "findingCount": 1
+    },
+    {
+      "path": "src/comments.ts",
+      "score": 0.75,
+      "findingCount": 1
+    }
+  ],
+  "directoryScores": []
+}

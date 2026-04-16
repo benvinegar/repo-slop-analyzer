@@ -1,10 +1,21 @@
 import type { RulePlugin } from "../core/types";
 import type { TryCatchSummary } from "../facts/types";
+import { delta } from "../rule-delta";
 import {
   formatTryCatchBoundary,
   isValidTryCatchTarget,
   scoreTryCatch,
 } from "./try-catch-rule-helpers";
+
+function findEmptyCatchSummaries(summaries: TryCatchSummary[]): TryCatchSummary[] {
+  return summaries.filter(
+    (summary) =>
+      isValidTryCatchTarget(summary) &&
+      summary.tryStatementCount <= 2 &&
+      summary.catchIsEmpty &&
+      !summary.isDocumentedLocalFallback,
+  );
+}
 
 /**
  * Flags empty catch clauses, which suppress failures without even leaving a log
@@ -18,6 +29,9 @@ export const emptyCatchRule: RulePlugin = {
   severity: "strong",
   scope: "file",
   requires: ["file.tryCatchSummaries"],
+  // Try/catch blocks do not usually move much in normal edits, so line-based
+  // matching is a cheaper tradeoff than rebuilding semantic identities.
+  delta: delta.byLocations(),
   supports(context) {
     return context.scope === "file" && Boolean(context.file);
   },
@@ -28,13 +42,7 @@ export const emptyCatchRule: RulePlugin = {
         "file.tryCatchSummaries",
       ) ?? [];
 
-    const flagged = summaries.filter(
-      (summary) =>
-        isValidTryCatchTarget(summary) &&
-        summary.tryStatementCount <= 2 &&
-        summary.catchIsEmpty &&
-        !summary.isDocumentedLocalFallback,
-    );
+    const flagged = findEmptyCatchSummaries(summaries);
 
     if (flagged.length === 0) {
       return [];

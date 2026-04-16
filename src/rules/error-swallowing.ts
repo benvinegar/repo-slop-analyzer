@@ -1,10 +1,18 @@
 import type { RulePlugin } from "../core/types";
 import type { TryCatchSummary } from "../facts/types";
+import { delta } from "../rule-delta";
 import {
   formatTryCatchBoundary,
   isValidTryCatchTarget,
   scoreTryCatch,
 } from "./try-catch-rule-helpers";
+
+function findErrorSwallowingSummaries(summaries: TryCatchSummary[]): TryCatchSummary[] {
+  return summaries.filter(
+    (summary) =>
+      isValidTryCatchTarget(summary) && summary.tryStatementCount <= 2 && summary.catchLogsOnly,
+  );
+}
 
 /**
  * Flags catch blocks that only log and then continue without changing control
@@ -17,6 +25,9 @@ export const errorSwallowingRule: RulePlugin = {
   severity: "strong",
   scope: "file",
   requires: ["file.tryCatchSummaries"],
+  // These catches are stable enough in practice that path+line matching keeps
+  // delta code far simpler than rebuilding custom semantic descriptors.
+  delta: delta.byLocations(),
   supports(context) {
     return context.scope === "file" && Boolean(context.file);
   },
@@ -27,10 +38,7 @@ export const errorSwallowingRule: RulePlugin = {
         "file.tryCatchSummaries",
       ) ?? [];
 
-    const flagged = summaries.filter(
-      (summary) =>
-        isValidTryCatchTarget(summary) && summary.tryStatementCount <= 2 && summary.catchLogsOnly,
-    );
+    const flagged = findErrorSwallowingSummaries(summaries);
 
     if (flagged.length === 0) {
       return [];

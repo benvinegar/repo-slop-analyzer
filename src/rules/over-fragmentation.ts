@@ -1,6 +1,7 @@
 import type { RulePlugin } from "../core/types";
 import { isTestFile } from "../facts/ts-helpers";
 import type { DirectoryMetrics } from "../facts/types";
+import { delta } from "../rule-delta";
 import { countMatching, isAssetLikeDirectoryPath, ratio } from "./helpers";
 
 /**
@@ -17,6 +18,7 @@ export const overFragmentationRule: RulePlugin = {
   severity: "strong",
   scope: "directory",
   requires: ["directory.metrics"],
+  delta: delta.byPath(),
   supports(context) {
     return context.scope === "directory" && Boolean(context.directory);
   },

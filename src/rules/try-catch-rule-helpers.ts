@@ -1,13 +1,35 @@
 import type { TryCatchSummary } from "../facts/types";
 
+/**
+ * Screens out probe-style catches that would dominate results without being meaningfully slop-like.
+ */
 export function isValidTryCatchTarget(summary: TryCatchSummary): boolean {
   return summary.hasCatchClause && !summary.isFilesystemExistenceProbe;
 }
 
+/**
+ * Keeps boundary context compact in evidence strings so rule output stays readable in CI logs.
+ */
 export function formatTryCatchBoundary(summary: TryCatchSummary): string {
   return summary.boundaryCategories.length > 0 ? summary.boundaryCategories.join("|") : "none";
 }
 
+/**
+ * Captures the structural parts of a try/catch that should survive line drift between scans.
+ */
+export function buildTryCatchIdentityBase(summary: TryCatchSummary) {
+  return {
+    enclosingSymbol: summary.enclosingSymbol,
+    boundaryCategories: summary.boundaryCategories,
+    boundaryOperationPaths: summary.boundaryOperationPaths,
+    tryStatementCount: summary.tryStatementCount,
+    catchStatementCount: summary.catchStatementCount,
+  };
+}
+
+/**
+ * Downweights boundary code without erasing the signal when the catch pattern is still suspicious.
+ */
 export function scoreTryCatch(summary: TryCatchSummary): number {
   let score = 3;
 

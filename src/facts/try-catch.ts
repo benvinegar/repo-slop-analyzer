@@ -2,6 +2,7 @@ import * as ts from "typescript";
 import type { FactProvider } from "../core/types";
 import type { TryCatchSummary } from "./types";
 import {
+  getEnclosingFunctionName,
   getExpressionPath,
   getLineNumber,
   isDefaultLiteral,
@@ -98,6 +99,9 @@ const BROWSER_METHODS = new Set([
   "type",
 ]);
 
+/**
+ * Extracts broad boundary categories and concrete call paths so rules can tell IO/config shells from core logic.
+ */
 function collectBoundarySignals(node: ts.TryStatement): {
   categories: string[];
   operationPaths: string[];
@@ -157,6 +161,9 @@ function collectBoundarySignals(node: ts.TryStatement): {
   };
 }
 
+/**
+ * Pulls only the comments inside a catch block so documented local fallbacks can be detected cheaply.
+ */
 function extractBlockComments(block: ts.Block, sourceFile: ts.SourceFile): string[] {
   const contentStart = block.getStart(sourceFile) + 1;
   const contentEnd = block.end - 1;
@@ -181,6 +188,9 @@ function extractBlockComments(block: ts.Block, sourceFile: ts.SourceFile): strin
     .filter(Boolean);
 }
 
+/**
+ * Covers compound assignments so local-fallback detection recognizes more than plain `=` writes.
+ */
 function isAssignmentOperator(kind: ts.SyntaxKind): boolean {
   return (
     kind === ts.SyntaxKind.EqualsToken ||
@@ -202,6 +212,9 @@ function isAssignmentOperator(kind: ts.SyntaxKind): boolean {
   );
 }
 
+/**
+ * Allows destructuring declarations while still treating writes outside local bindings as side effects.
+ */
 function isLocalBindingName(name: ts.BindingName): boolean {
   if (ts.isIdentifier(name)) {
     return true;
@@ -220,10 +233,16 @@ function isLocalBindingName(name: ts.BindingName): boolean {
   });
 }
 
+/**
+ * Keeps the fallback heuristic strict about mutating only identifiers declared in local scope.
+ */
 function isLocalAssignmentTarget(expression: ts.Expression): boolean {
   return ts.isIdentifier(unwrapExpression(expression));
 }
 
+/**
+ * Approximates "this try block is just probing candidate values" without needing full data-flow analysis.
+ */
 function resolvesLocalValuesInStatement(statement: ts.Statement): boolean {
   if (ts.isBlock(statement)) {
     return statement.statements.every(resolvesLocalValuesInStatement);
@@ -254,6 +273,9 @@ function resolvesLocalValuesInStatement(statement: ts.Statement): boolean {
   return false;
 }
 
+/**
+ * Limits the local-fallback shortcut to tiny try blocks where the structural approximation is trustworthy.
+ */
 function resolvesLocalValuesInTryBlock(tryBlock: ts.Block): boolean {
   return (
     tryBlock.statements.length > 0 &&
@@ -262,6 +284,9 @@ function resolvesLocalValuesInTryBlock(tryBlock: ts.Block): boolean {
   );
 }
 
+/**
+ * Suppresses commonplace file-existence probes that otherwise resemble noisy defensive code.
+ */
 function isFilesystemExistenceProbe(
   tryStatementCount: number,
   catchReturnsDefault: boolean,
@@ -278,6 +303,9 @@ function isFilesystemExistenceProbe(
   );
 }
 
+/**
+ * Collapses AST detail into the shared try/catch summary consumed by the defensive catch rules.
+ */
 function summarizeTryStatement(node: ts.TryStatement, sourceFile: ts.SourceFile): TryCatchSummary {
   const catchBlock = node.catchClause?.block;
   const catchStatements = catchBlock?.statements ?? [];
@@ -314,6 +342,7 @@ function summarizeTryStatement(node: ts.TryStatement, sourceFile: ts.SourceFile)
 
   return {
     line: getLineNumber(sourceFile, node.getStart(sourceFile)),
+    enclosingSymbol: getEnclosingFunctionName(node, sourceFile),
     hasCatchClause: Boolean(node.catchClause),
     tryStatementCount,
     catchStatementCount: catchStatements.length,

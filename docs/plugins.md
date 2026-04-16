@@ -71,8 +71,12 @@ A plugin module exports an object with:
 
 Use `PLUGIN_API_VERSION` when authoring a plugin in TypeScript.
 
+If your rule should participate in stable deltas, prefer a declarative `delta`
+strategy such as `delta.byPath()` or `delta.byLocations()` instead of hand-building
+`deltaIdentity` inside `evaluate()`.
+
 ```ts
-import { definePlugin, PLUGIN_API_VERSION } from "slop-scan";
+import { definePlugin, delta, PLUGIN_API_VERSION } from "slop-scan";
 
 export default definePlugin({
   meta: {
@@ -87,6 +91,7 @@ export default definePlugin({
       severity: "weak",
       scope: "file",
       requires: ["file.text"],
+      delta: delta.byPath(),
       supports(context) {
         return context.scope === "file" && Boolean(context.file);
       },
@@ -120,6 +125,34 @@ export default definePlugin({
     },
   },
 });
+```
+
+For the rare clustered rule where path/line matching is not enough, return
+`deltaKeys` from `evaluate()` with a stable `key` string per occurrence and an
+optional shared `group` string for the cluster.
+
+```ts
+return [
+  {
+    ruleId: "acme/duplicate-helper",
+    family: "acme",
+    severity: "medium",
+    scope: "file",
+    path: context.file.path,
+    message: "Found 1 duplicate helper cluster",
+    evidence: ["normalizeUser also appears in other files"],
+    score: 2,
+    locations: [{ path: context.file.path, line: 12 }],
+    deltaKeys: [
+      {
+        key: `${cluster.fingerprint}:${context.file.path}`,
+        group: cluster.fingerprint,
+        path: context.file.path,
+        line: 12,
+      },
+    ],
+  },
+];
 ```
 
 ## Naming rules

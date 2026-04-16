@@ -2,6 +2,46 @@ import type { RulePlugin } from "../core/types";
 import type { DuplicateFunctionIndex } from "../facts/types";
 import { isTestFile } from "../facts/ts-helpers";
 
+function findUniqueDuplicateFunctionClusters(
+  duplication: DuplicateFunctionIndex | undefined,
+  filePath: string,
+) {
+  const clusters = duplication?.byFile[filePath] ?? [];
+
+  return clusters.filter(
+    (cluster, index) =>
+      clusters.findIndex((candidate) => candidate.fingerprint === cluster.fingerprint) === index,
+  );
+}
+
+/**
+ * Uses the repo-level cluster fingerprint as the group key, then adds the local
+ * file path to distinguish this file's member occurrence inside that cluster.
+ */
+function buildDuplicateFunctionSignatureDeltaKeys(
+  duplication: DuplicateFunctionIndex | undefined,
+  filePath: string,
+) {
+  const uniqueClusters = findUniqueDuplicateFunctionClusters(duplication, filePath);
+
+  return uniqueClusters.flatMap((cluster) => {
+    const primaryOccurrence = cluster.occurrences
+      .filter((occurrence) => occurrence.path === filePath)
+      .sort((left, right) => left.line - right.line || left.name.localeCompare(right.name))[0];
+
+    if (!primaryOccurrence) {
+      return [];
+    }
+
+    return {
+      key: `${cluster.fingerprint}:${filePath}`,
+      group: cluster.fingerprint,
+      path: filePath,
+      line: primaryOccurrence.line,
+    };
+  });
+}
+
 /**
  * Flags non-test files whose function bodies match the same normalized helper
  * shape found in several other source files.
@@ -22,16 +62,11 @@ export const duplicateFunctionSignaturesRule: RulePlugin = {
     const duplication = context.runtime.store.getRepoFact<DuplicateFunctionIndex>(
       "repo.duplicateFunctionSignatures",
     );
-    const clusters = duplication?.byFile[context.file!.path] ?? [];
+    const uniqueClusters = findUniqueDuplicateFunctionClusters(duplication, context.file!.path);
 
-    if (clusters.length === 0) {
+    if (uniqueClusters.length === 0) {
       return [];
     }
-
-    const uniqueClusters = clusters.filter(
-      (cluster, index) =>
-        clusters.findIndex((candidate) => candidate.fingerprint === cluster.fingerprint) === index,
-    );
 
     return [
       {
@@ -65,6 +100,7 @@ export const duplicateFunctionSignaturesRule: RulePlugin = {
             line: occurrence.line,
           })),
         ),
+        deltaKeys: buildDuplicateFunctionSignatureDeltaKeys(duplication, context.file!.path),
       },
     ];
   },

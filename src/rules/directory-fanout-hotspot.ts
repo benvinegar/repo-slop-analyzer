@@ -2,6 +2,7 @@ import path from "node:path";
 import type { RulePlugin } from "../core/types";
 import { isTestFile } from "../facts/ts-helpers";
 import type { DirectoryMetrics } from "../facts/types";
+import { delta } from "../rule-delta";
 import { average, countMatching, isAssetLikeDirectoryPath, median, ratio } from "./helpers";
 
 /**
@@ -18,6 +19,7 @@ export const directoryFanoutHotspotRule: RulePlugin = {
   severity: "medium",
   scope: "directory",
   requires: ["directory.metrics"],
+  delta: delta.byPath(),
   supports(context) {
     return context.scope === "directory" && Boolean(context.directory);
   },

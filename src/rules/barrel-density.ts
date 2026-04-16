@@ -1,5 +1,6 @@
 import type { RulePlugin } from "../core/types";
 import type { ExportSummary } from "../facts/types";
+import { delta } from "../rule-delta";
 
 /**
  * Flags files that are mostly re-export barrels.
@@ -14,6 +15,7 @@ export const barrelDensityRule: RulePlugin = {
   severity: "medium",
   scope: "file",
   requires: ["file.exportSummary"],
+  delta: delta.byPath(),
   supports(context) {
     return context.scope === "file" && Boolean(context.file);
   },

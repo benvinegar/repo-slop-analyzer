@@ -1,0 +1,88 @@
+{
+  "metadata": {
+    "schemaVersion": 2,
+    "tool": {
+      "name": "slop-scan",
+      "version": "0.2.0"
+    },
+    "configHash": "fixture-config",
+    "findingFingerprintVersion": 1,
+    "plugins": []
+  },
+  "rootDir": "/fixture/base",
+  "config": {
+    "ignores": [],
+    "rules": {},
+    "thresholds": {},
+    "overrides": []
+  },
+  "summary": {
+    "fileCount": 1,
+    "directoryCount": 1,
+    "findingCount": 1,
+    "repoScore": 2.5,
+    "physicalLineCount": 10,
+    "logicalLineCount": 8,
+    "functionCount": 1,
+    "normalized": {
+      "scorePerFile": 2.5,
+      "scorePerKloc": 312.5,
+      "scorePerFunction": 2.5,
+      "findingsPerFile": 1,
+      "findingsPerKloc": 125,
+      "findingsPerFunction": 1
+    }
+  },
+  "files": [
+    {
+      "path": "src/service.ts",
+      "extension": ".ts",
+      "lineCount": 10,
+      "languageId": "javascript-like"
+    }
+  ],
+  "directories": [
+    {
+      "path": "src",
+      "filePaths": ["src/service.ts"]
+    }
+  ],
+  "findings": [
+    {
+      "ruleId": "structure.pass-through-wrappers",
+      "family": "structure",
+      "severity": "medium",
+      "scope": "file",
+      "message": "Found 1 pass-through wrapper",
+      "evidence": ["fetchUser at line 3 -> api.getUser"],
+      "score": 2.5,
+      "path": "src/service.ts",
+      "locations": [
+        {
+          "path": "src/service.ts",
+          "line": 3,
+          "column": 1
+        }
+      ],
+      "deltaIdentity": {
+        "fingerprintVersion": 1,
+        "occurrences": [
+          {
+            "fingerprint": "structure.pass-through-wrappers:occ:fixture-wrapper",
+            "path": "src/service.ts",
+            "line": 3,
+            "column": 1
+          }
+        ]
+      }
+    }
+  ],
+  "fileScores": [
+    {
+      "path": "src/service.ts",
+      "score": 2.5,
+      "findingCount": 1
+    }
+  ],
+  "directoryScores": []
+}

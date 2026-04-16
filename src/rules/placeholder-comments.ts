@@ -1,5 +1,6 @@
 import type { RulePlugin } from "../core/types";
 import type { CommentSummary } from "../facts/types";
+import { delta } from "../rule-delta";
 
 /**
  * Flags filler comments that gesture at future work without explaining current
@@ -16,12 +17,21 @@ const PLACEHOLDER_PATTERNS = [
   /implement\s+.+\s+here/i,
 ];
 
+function findPlaceholderCommentMatches(comments: CommentSummary[]): CommentSummary[] {
+  return comments.filter((comment) =>
+    PLACEHOLDER_PATTERNS.some((pattern) => pattern.test(comment.text)),
+  );
+}
+
 export const placeholderCommentsRule: RulePlugin = {
   id: "comments.placeholder-comments",
   family: "comments",
   severity: "weak",
   scope: "file",
   requires: ["file.comments"],
+  // Placeholder comments usually remain attached to the same lines, so simple
+  // location matching is easier to understand than re-deriving semantic keys.
+  delta: delta.byLocations(),
   supports(context) {
     return context.scope === "file" && Boolean(context.file);
   },
@@ -30,9 +40,7 @@ export const placeholderCommentsRule: RulePlugin = {
     const comments =
       context.runtime.store.getFileFact<CommentSummary[]>(context.file!.path, "file.comments") ??
       [];
-    const matches = comments.filter((comment) =>
-      PLACEHOLDER_PATTERNS.some((pattern) => pattern.test(comment.text)),
-    );
+    const matches = findPlaceholderCommentMatches(comments);
 
     if (matches.length === 0) {
       return [];

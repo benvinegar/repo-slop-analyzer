@@ -2,6 +2,46 @@ import type { RulePlugin } from "../core/types";
 import type { DuplicateTestSetupIndex } from "../facts/types";
 import { isTestFile } from "../facts/ts-helpers";
 
+function findUniqueDuplicateMockSetupClusters(
+  duplication: DuplicateTestSetupIndex | undefined,
+  filePath: string,
+) {
+  const clusters = duplication?.byFile[filePath] ?? [];
+
+  return clusters.filter(
+    (cluster, index) =>
+      clusters.findIndex((candidate) => candidate.fingerprint === cluster.fingerprint) === index,
+  );
+}
+
+/**
+ * Uses the repo-level duplicate-cluster fingerprint as the stable group key,
+ * then combines it with the local file path for this file's occurrence key.
+ */
+function buildDuplicateMockSetupDeltaKeys(
+  duplication: DuplicateTestSetupIndex | undefined,
+  filePath: string,
+) {
+  const uniqueClusters = findUniqueDuplicateMockSetupClusters(duplication, filePath);
+
+  return uniqueClusters.flatMap((cluster) => {
+    const primaryOccurrence = cluster.occurrences
+      .filter((occurrence) => occurrence.path === filePath)
+      .sort((left, right) => left.line - right.line)[0];
+
+    if (!primaryOccurrence) {
+      return [];
+    }
+
+    return {
+      key: `${cluster.fingerprint}:${filePath}`,
+      group: cluster.fingerprint,
+      path: filePath,
+      line: primaryOccurrence.line,
+    };
+  });
+}
+
 /**
  * Flags repeated test setup/mock shapes that appear across multiple test files.
  *
@@ -22,19 +62,11 @@ export const duplicateMockSetupRule: RulePlugin = {
     const duplication = context.runtime.store.getRepoFact<DuplicateTestSetupIndex>(
       "repo.testMockDuplication",
     );
-    const clusters = duplication?.byFile[context.file!.path] ?? [];
+    const uniqueClusters = findUniqueDuplicateMockSetupClusters(duplication, context.file!.path);
 
-    if (clusters.length === 0) {
+    if (uniqueClusters.length === 0) {
       return [];
     }
-
-    // A file can reference the same duplication cluster multiple times via
-    // multiple occurrences. Deduplicate by fingerprint so the rule message talks
-    // about distinct repeated patterns, not raw occurrence count.
-    const uniqueClusters = clusters.filter(
-      (cluster, index) =>
-        clusters.findIndex((candidate) => candidate.fingerprint === cluster.fingerprint) === index,
-    );
 
     return [
       {
@@ -63,6 +95,7 @@ export const duplicateMockSetupRule: RulePlugin = {
             line: occurrence.line,
           })),
         ),
+        deltaKeys: buildDuplicateMockSetupDeltaKeys(duplication, context.file!.path),
       },
     ];
   },

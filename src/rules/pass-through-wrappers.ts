@@ -1,5 +1,6 @@
 import type { RulePlugin } from "../core/types";
 import type { CommentSummary, FunctionSummary } from "../facts/types";
+import { delta } from "../rule-delta";
 import { BOUNDARY_WRAPPER_TARGET_PREFIXES } from "./helpers";
 
 // Nearby wording like "alias" or "backward compatibility" usually means the
@@ -15,9 +16,7 @@ const ALIAS_COMMENT_PATTERNS = [
 ];
 
 /**
- * Returns true when the wrapper is immediately preceded by a compatibility
- * comment. We only look one or two lines upward to keep the association tight
- * and avoid broad file-level exemptions.
+ * Associates alias comments only when they are immediately adjacent so unrelated wrappers elsewhere in the file still count.
  */
 function hasNearbyAliasComment(summary: FunctionSummary, comments: CommentSummary[]): boolean {
   return comments.some((comment) => {
@@ -28,6 +27,20 @@ function hasNearbyAliasComment(summary: FunctionSummary, comments: CommentSummar
       ALIAS_COMMENT_PATTERNS.some((pattern) => pattern.test(comment.text))
     );
   });
+}
+
+function findPassThroughWrappers(
+  functions: FunctionSummary[],
+  comments: CommentSummary[],
+): FunctionSummary[] {
+  return functions.filter(
+    (summary) =>
+      summary.isPassThroughWrapper &&
+      !hasNearbyAliasComment(summary, comments) &&
+      !BOUNDARY_WRAPPER_TARGET_PREFIXES.some((prefix) =>
+        summary.passThroughTarget?.startsWith(prefix),
+      ),
+  );
 }
 
 /**
@@ -44,6 +57,9 @@ export const passThroughWrappersRule: RulePlugin = {
   severity: "strong",
   scope: "file",
   requires: ["file.functionSummaries", "file.comments"],
+  // These wrappers rarely hop around enough to justify custom semantic keys;
+  // one occurrence per reported line keeps delta behavior easy to follow.
+  delta: delta.byLocations(),
   supports(context) {
     return context.scope === "file" && Boolean(context.file);
   },
@@ -57,14 +73,7 @@ export const passThroughWrappersRule: RulePlugin = {
       context.runtime.store.getFileFact<CommentSummary[]>(context.file!.path, "file.comments") ??
       [];
 
-    const wrappers = functions.filter(
-      (summary) =>
-        summary.isPassThroughWrapper &&
-        !hasNearbyAliasComment(summary, comments) &&
-        !BOUNDARY_WRAPPER_TARGET_PREFIXES.some((prefix) =>
-          summary.passThroughTarget?.startsWith(prefix),
-        ),
-    );
+    const wrappers = findPassThroughWrappers(functions, comments);
 
     if (wrappers.length === 0) {
       return [];

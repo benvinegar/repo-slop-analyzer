@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 2,
+  "tool": {
+    "name": "slop-scan",
+    "version": "0.2.0"
+  },
+  "base": {
+    "rootDir": "/fixture/base",
+    "metadata": {
+      "schemaVersion": 2,
+      "tool": {
+        "name": "slop-scan",
+        "version": "0.2.0"
+      },
+      "configHash": "fixture-config",
+      "findingFingerprintVersion": 1,
+      "plugins": []
+    },
+    "summary": {
+      "fileCount": 1,
+      "directoryCount": 1,
+      "findingCount": 1,
+      "repoScore": 2.5,
+      "physicalLineCount": 10,
+      "logicalLineCount": 8,
+      "functionCount": 1,
+      "normalized": {
+        "scorePerFile": 2.5,
+        "scorePerKloc": 312.5,
+        "scorePerFunction": 2.5,
+        "findingsPerFile": 1,
+        "findingsPerKloc": 125,
+        "findingsPerFunction": 1
+      }
+    }
+  },
+  "head": {
+    "rootDir": "/fixture/head",
+    "metadata": {
+      "schemaVersion": 2,
+      "tool": {
+        "name": "slop-scan",
+        "version": "0.2.0"
+      },
+      "configHash": "fixture-config",
+      "findingFingerprintVersion": 1,
+      "plugins": []
+    },
+    "summary": {
+      "fileCount": 2,
+      "directoryCount": 1,
+      "findingCount": 2,
+      "repoScore": 3.75,
+      "physicalLineCount": 16,
+      "logicalLineCount": 12,
+      "functionCount": 1,
+      "normalized": {
+        "scorePerFile": 1.875,
+        "scorePerKloc": 312.5,
+        "scorePerFunction": 3.75,
+        "findingsPerFile": 1,
+        "findingsPerKloc": 166.66666666666666,
+        "findingsPerFunction": 2
+      }
+    }
+  },
+  "summary": {
+    "baseFindingCount": 1,
+    "headFindingCount": 2,
+    "netFindingCount": 1,
+    "baseRepoScore": 2.5,
+    "headRepoScore": 3.75,
+    "netRepoScore": 1.25,
+    "addedCount": 1,
+    "resolvedCount": 0,
+    "worsenedCount": 1,
+    "improvedCount": 0,
+    "unchangedCount": 0,
+    "changedPathCount": 2,
+    "hasChanges": true
+  },
+  "warnings": [],
+  "paths": [
+    {
+      "path": "src/comments.ts",
+      "baseScore": 0,
+      "headScore": 0.75,
+      "scoreDelta": 0.75,
+      "addedCount": 1,
+      "resolvedCount": 0,
+      "worsenedCount": 0,
+      "improvedCount": 0,
+      "changes": [
+        {
+          "status": "added",
+          "scope": "file",
+          "path": "src/comments.ts",
+          "ruleId": "comments.placeholder-comments",
+          "family": "comments",
+          "fingerprint": "comments.placeholder-comments:occ:fixture-comment",
+          "fingerprintVersion": 1,
+          "base": null,
+          "head": {
+            "fingerprint": "comments.placeholder-comments:occ:fixture-comment",
+            "fingerprintVersion": 1,
+            "scope": "file",
+            "path": "src/comments.ts",
+            "locations": [
+              {
+                "path": "src/comments.ts",
+                "line": 1,
+                "column": 1
+              }
+            ],
+            "primaryLocation": {
+              "path": "src/comments.ts",
+              "line": 1,
+              "column": 1
+            },
+            "ruleId": "comments.placeholder-comments",
+            "family": "comments",
+            "severity": "weak",
+            "message": "Found 1 placeholder-style comments",
+            "evidence": ["// TODO: revisit edge cases"],
+            "score": 0.75
+          }
+        }
+      ]
+    },
+    {
+      "path": "src/service.ts",
+      "baseScore": 2.5,
+      "headScore": 3,
+      "scoreDelta": 0.5,
+      "addedCount": 0,
+      "resolvedCount": 0,
+      "worsenedCount": 1,
+      "improvedCount": 0,
+      "changes": [
+        {
+          "status": "worsened",
+          "scope": "file",
+          "path": "src/service.ts",
+          "ruleId": "structure.pass-through-wrappers",
+          "family": "structure",
+          "fingerprint": "structure.pass-through-wrappers:occ:fixture-wrapper",
+          "fingerprintVersion": 1,
+          "base": {
+            "fingerprint": "structure.pass-through-wrappers:occ:fixture-wrapper",
+            "fingerprintVersion": 1,
+            "scope": "file",
+            "path": "src/service.ts",
+            "locations": [
+              {
+                "path": "src/service.ts",
+                "line": 3,
+                "column": 1
+              }
+            ],
+            "primaryLocation": {
+              "path": "src/service.ts",
+              "line": 3,
+              "column": 1
+            },
+            "ruleId": "structure.pass-through-wrappers",
+            "family": "structure",
+            "severity": "medium",
+            "message": "Found 1 pass-through wrapper",
+            "evidence": ["fetchUser at line 3 -> api.getUser"],
+            "score": 2.5
+          },
+          "head": {
+            "fingerprint": "structure.pass-through-wrappers:occ:fixture-wrapper",
+            "fingerprintVersion": 1,
+            "scope": "file",
+            "path": "src/service.ts",
+            "locations": [
+              {
+                "path": "src/service.ts",
+                "line": 3,
+                "column": 1
+              }
+            ],
+            "primaryLocation": {
+              "path": "src/service.ts",
+              "line": 3,
+              "column": 1
+            },
+            "ruleId": "structure.pass-through-wrappers",
+            "family": "structure",
+            "severity": "medium",
+            "message": "Found 1 pass-through wrapper",
+            "evidence": ["fetchUser at line 3 -> api.getUser"],
+            "score": 3
+          }
+        }
+      ]
+    }
+  ],
+  "repoChanges": [],
+  "rules": [
+    {
+      "ruleId": "comments.placeholder-comments",
+      "family": "comments",
+      "addedCount": 1,
+      "resolvedCount": 0,
+      "worsenedCount": 0,
+      "improvedCount": 0
+    },
+    {
+      "ruleId": "structure.pass-through-wrappers",
+      "family": "structure",
+      "addedCount": 0,
+      "resolvedCount": 0,
+      "worsenedCount": 1,
+      "improvedCount": 0
+    }
+  ]
+}

@@ -1,10 +1,12 @@
 import type { AnalysisResult, ReporterPlugin } from "../core/types";
+import { getReportMetadata } from "../report-metadata";
 
 export const jsonReporter: ReporterPlugin = {
   id: "json",
   render(result: AnalysisResult): string {
     return JSON.stringify(
       {
+        metadata: getReportMetadata(result),
         rootDir: result.rootDir,
         config: result.config,
         summary: result.summary,

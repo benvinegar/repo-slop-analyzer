@@ -6,6 +6,7 @@ import type { AnalyzerConfig, RuleConfig } from "../config";
 import { discoverSourceFiles } from "../discovery/walk";
 import { countLogicalLines, countPhysicalLines } from "../facts/ts-helpers";
 import type { FunctionSummary } from "../facts/types";
+import { buildFindingDeltaIdentity } from "../rule-delta";
 import { FactStore } from "./fact-store";
 import { Registry } from "./registry";
 import { orderFactProviders, validateRuleRequirements } from "./scheduler";
@@ -18,6 +19,7 @@ import type {
   FileRecord,
   Finding,
   ProviderContext,
+  RuleFinding,
   RulePlugin,
 } from "./types";
 
@@ -282,9 +284,17 @@ async function runRules(
         ? await nextFindingsResult
         : nextFindingsResult;
       for (const finding of nextFindings) {
-        findings.push({
+        const weightedFinding = {
           ...finding,
           score: finding.score * resolvedRuleConfig.weight,
+        } satisfies RuleFinding;
+        const { deltaKeys: _deltaKeys, ...findingWithoutDeltaKeys } = weightedFinding;
+
+        findings.push({
+          ...findingWithoutDeltaKeys,
+          deltaIdentity:
+            findingWithoutDeltaKeys.deltaIdentity ??
+            buildFindingDeltaIdentity(rule.id, weightedFinding, rule.delta),
         });
       }
     }

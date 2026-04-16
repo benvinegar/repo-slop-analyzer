@@ -37,6 +37,12 @@ describe("parseCliArgs --ignore", () => {
     expect(parseCliArgs(["-h"]).help).toBe(true);
     expect(parseCliArgs(["scan", "."]).help).toBe(false);
   });
+
+  test("rejects extra scan positionals", () => {
+    expect(() => parseCliArgs(["scan", ".", "extra"])).toThrow(
+      "The scan command accepts at most one target path.",
+    );
+  });
 });
 
 describe("--ignore CLI integration", () => {

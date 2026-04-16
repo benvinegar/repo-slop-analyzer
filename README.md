@@ -100,6 +100,39 @@ slop-scan scan . --json | jq -e '.summary.findingCount == 0'
 
 The CLI currently exits non-zero for CLI/runtime errors, not for findings.
 
+## Delta comparisons
+
+Use `delta` when you want a machine-readable comparison between two scans.
+
+Compare two paths directly:
+
+```bash
+slop-scan delta ../main .
+slop-scan delta --base ../main --head . --json
+```
+
+Compare two saved reports:
+
+```bash
+slop-scan scan ../main --json > base.json
+slop-scan scan . --json > head.json
+slop-scan delta --base-report base.json --head-report head.json
+```
+
+Fail CI only when new or worse occurrence-level findings show up:
+
+```bash
+slop-scan delta --base ../main --fail-on added,worsened
+```
+
+`delta --json` emits a generic report format with:
+
+- base/head scan summaries
+- occurrence-level change classification (`added`, `resolved`, `worsened`, `improved`)
+- per-path score deltas
+- report metadata and config hashes so downstream tools can detect mismatched scan conditions
+- stable per-occurrence fingerprints for built-in rules, so grouped findings can match across rescans without relying on rendered message text
+
 ## What it catches
 
 Current checks focus on patterns that often show up in unreviewed generated code:
@@ -236,6 +269,7 @@ Supported today:
 `slop-scan` can load third-party rule plugins and plugin preset configs from JSON or module configs.
 
 For plugin setup, naming rules, and authoring examples, see [docs/plugins.md](docs/plugins.md).
+Simple plugin rules can now declare stable delta behavior with helpers like `delta.byPath()` / `delta.byLocations()`, and clustered rules can attach lightweight `deltaKeys` instead of building fingerprints manually.
 
 See also:
 
