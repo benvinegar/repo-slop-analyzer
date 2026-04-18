@@ -5,6 +5,8 @@ import type {
 } from "./history";
 import type { BenchmarkSet } from "./types";
 
+const SPARKLINE_BARS = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"] as const;
+
 function formatMetric(value: number | null, digits = 2): string {
   return value === null ? "n/a" : value.toFixed(digits);
 }
@@ -33,6 +35,39 @@ function renderAnalyzerSummary(summary: BenchmarkHistoryLatestSummary): string[]
   );
 }
 
+function renderSparkline(values: Array<number | null>): string {
+  const presentValues = values.filter((value): value is number => value !== null);
+  if (presentValues.length === 0) {
+    return "n/a";
+  }
+
+  const min = Math.min(...presentValues);
+  const max = Math.max(...presentValues);
+
+  if (min === max) {
+    return values.map((value) => (value === null ? "·" : "▅")).join("");
+  }
+
+  return values
+    .map((value) => {
+      if (value === null) {
+        return "·";
+      }
+
+      const normalized = (value - min) / (max - min);
+      const index = Math.min(
+        SPARKLINE_BARS.length - 1,
+        Math.max(0, Math.round(normalized * (SPARKLINE_BARS.length - 1))),
+      );
+      return SPARKLINE_BARS[index] ?? "█";
+    })
+    .join("");
+}
+
+function renderPinnedTrend(repo: BenchmarkHistoryRepoSummary): string {
+  return renderSparkline(repo.series.map((point) => point.blendedVsPinnedBaseline).slice(-8));
+}
+
 function sortByPinnedTrend(
   repos: BenchmarkHistoryRepoSummary[],
   deltaSelector: (delta: BenchmarkHistoryDelta | null) => number | null,
@@ -46,13 +81,13 @@ function sortByPinnedTrend(
 
 function renderRepoTable(repos: BenchmarkHistoryRepoSummary[]): string[] {
   const lines = [
-    "| Repo | Points | Latest ref | Current blended | Pinned blended | Δ prev (pinned) | Δ first (pinned) | Score/file | Findings/file |",
-    "|---|---:|---|---:|---:|---:|---:|---:|---:|",
+    "| Repo | Points | Trend (pinned) | Latest ref | Current blended | Pinned blended | Δ prev (pinned) | Δ first (pinned) | Score/file | Findings/file |",
+    "|---|---:|---|---|---:|---:|---:|---:|---:|---:|",
   ];
 
   for (const repo of repos) {
     lines.push(
-      `| ${renderRepoLink(repo)} | ${repo.pointCount} | \`${repo.latest.defaultBranch}@${shortRef(repo.latest.ref)}\` | **${formatMetric(repo.latest.blended.vsCurrentCohort)}** | **${formatMetric(repo.latest.blended.vsPinnedBaseline)}** | ${formatSigned(repo.deltaFromPrevious?.blendedVsPinnedBaseline ?? null)} | ${formatSigned(repo.deltaFromFirst.blendedVsPinnedBaseline)} | ${formatMetric(repo.latest.summary.normalized.scorePerFile)} | ${formatMetric(repo.latest.summary.normalized.findingsPerFile)} |`,
+      `| ${renderRepoLink(repo)} | ${repo.pointCount} | ${renderPinnedTrend(repo)} | \`${repo.latest.defaultBranch}@${shortRef(repo.latest.ref)}\` | **${formatMetric(repo.latest.blended.vsCurrentCohort)}** | **${formatMetric(repo.latest.blended.vsPinnedBaseline)}** | ${formatSigned(repo.deltaFromPrevious?.blendedVsPinnedBaseline ?? null)} | ${formatSigned(repo.deltaFromFirst.blendedVsPinnedBaseline)} | ${formatMetric(repo.latest.summary.normalized.scorePerFile)} | ${formatMetric(repo.latest.summary.normalized.findingsPerFile)} |`,
     );
   }
 
@@ -100,12 +135,18 @@ export function renderBenchmarkHistoryReport(
     "",
     "## Goal",
     "",
-    `${set.description} This rolling history tracks the same repos at their latest default-branch revisions so the benchmark can show movement over time.`,
+    `${set.description} This rolling history tracks the same repos at the default-branch revision that existed at each recorded run time so the benchmark can show movement over time.`,
     "",
     "## Refresh",
     "",
     "```bash",
     "bun run benchmark:history",
+    "```",
+    "",
+    "To backfill earlier weekly points honestly, rerun the history job with a past timestamp so each repo resolves the default-branch commit that existed at that time:",
+    "",
+    "```bash",
+    "bun run benchmark:history --recorded-at 2026-04-06T12:00:00Z",
     "```",
     "",
     "## Latest analyzer revisions",
@@ -139,7 +180,9 @@ export function renderBenchmarkHistoryReport(
     "",
     "- `Current blended` is relative to the latest mature-OSS cohort medians from the same run, so it is best for week-by-week ranking.",
     "- `Pinned blended` is relative to the frozen pinned benchmark baseline, so it is the cleaner long-term trend line.",
+    "- `Trend (pinned)` is a mini sparkline of the repo's stored pinned-blended values across recent weekly points.",
     "- Each repo stores one JSONL datapoint per UTC week; reruns in the same week replace that week's datapoint instead of appending duplicates.",
+    "- Older backfills can have fewer points for newer repos because the history job skips weeks before a repo had any commit on its current default branch.",
     "- The existing pinned benchmark report remains the reproducible source of truth for exact SHA-based benchmark claims.",
   ];
 

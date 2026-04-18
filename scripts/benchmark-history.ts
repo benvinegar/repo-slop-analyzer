@@ -67,23 +67,19 @@ async function writeIfChanged(targetPath: string, content: string): Promise<bool
   return true;
 }
 
-function resolveLatestRef(spec: BenchmarkRepoSpec): BenchmarkRepoResolution {
+function resolveDefaultBranch(spec: BenchmarkRepoSpec): string {
   // Use git itself for default-branch discovery so the history job does not depend on the
   // GitHub REST API or repository-specific metadata caching.
   const output = run("git", ["ls-remote", "--symref", spec.url, "HEAD"]);
-  const parsed = parseLsRemoteDefaultBranch(output);
-  return {
-    repoId: spec.id,
-    defaultBranch: parsed.defaultBranch,
-    ref: parsed.ref,
-  };
+  return parseLsRemoteDefaultBranch(output).defaultBranch;
 }
 
 async function prepareCheckout(
   checkoutsDir: string,
   spec: BenchmarkRepoSpec,
-  resolution: BenchmarkRepoResolution,
-): Promise<string> {
+  defaultBranch: string,
+  recordedAt: string,
+): Promise<(BenchmarkRepoResolution & { checkoutPath: string }) | null> {
   // History checkouts intentionally live in a separate cache from the pinned benchmark cache so
   // latest-ref scans cannot disturb the exact-SHA reproducible benchmark workflow.
   const checkoutPath = path.join(checkoutsDir, spec.id);
@@ -96,18 +92,35 @@ async function prepareCheckout(
 
   run("git", ["remote", "set-url", "origin", spec.url], checkoutPath);
   run("git", ["fetch", "--force", "--prune", "--filter=blob:none", "origin"], checkoutPath);
-  run("git", ["checkout", "--force", "--detach", resolution.ref], checkoutPath);
-  run("git", ["reset", "--hard", resolution.ref], checkoutPath);
+
+  // Resolve the commit that was on the default branch at the scheduled run time. This makes
+  // backfills honest: older weekly points reflect historical branch state, not today's HEAD.
+  const ref = run(
+    "git",
+    ["rev-list", "-1", `--before=${recordedAt}`, `origin/${defaultBranch}`],
+    checkoutPath,
+  );
+
+  if (!ref) {
+    console.log(`no commit on ${defaultBranch} at or before ${recordedAt}; skipping ${spec.id}`);
+    return null;
+  }
+
+  run("git", ["checkout", "--force", "--detach", ref], checkoutPath);
+  run("git", ["reset", "--hard", ref], checkoutPath);
   run("git", ["clean", "-fdx"], checkoutPath);
 
   const actualRef = run("git", ["rev-parse", "HEAD"], checkoutPath);
-  if (actualRef !== resolution.ref) {
-    throw new Error(
-      `Latest ref mismatch for ${spec.id}: expected ${resolution.ref}, got ${actualRef}`,
-    );
+  if (actualRef !== ref) {
+    throw new Error(`Resolved ref mismatch for ${spec.id}: expected ${ref}, got ${actualRef}`);
   }
 
-  return checkoutPath;
+  return {
+    repoId: spec.id,
+    defaultBranch,
+    ref,
+    checkoutPath,
+  };
 }
 
 const manifestPath = getOption(process.argv.slice(2), "--manifest", DEFAULT_BENCHMARK_SET_PATH);
@@ -139,9 +152,15 @@ await mkdir(historyDir, { recursive: true });
 
 for (const repo of benchmarkSet.repos) {
   console.log(`\n==> resolving ${repo.id} (${repo.repo})`);
-  const resolution = resolveLatestRef(repo);
+  const defaultBranch = resolveDefaultBranch(repo);
+  const prepared = await prepareCheckout(checkoutsDir, repo, defaultBranch, recordedAt);
+
+  if (!prepared) {
+    continue;
+  }
+
+  const { checkoutPath, ...resolution } = prepared;
   console.log(`default branch ${resolution.defaultBranch} @ ${resolution.ref.slice(0, 7)}`);
-  const checkoutPath = await prepareCheckout(checkoutsDir, repo, resolution);
 
   console.log(`scanning ${repo.id}`);
   const result = await analyzeRepository(checkoutPath, DEFAULT_CONFIG, registry);

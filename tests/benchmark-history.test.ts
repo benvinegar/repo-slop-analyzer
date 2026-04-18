@@ -139,6 +139,7 @@ describe("benchmark history support", () => {
     expect(getUtcWeekStartDate("2026-04-15T12:00:00Z")).toBe("2026-04-13");
     expect(weekOnePoints).toHaveLength(2);
     expect(weekOnePoints[0]?.periodStart).toBe("2026-04-13");
+    expect(weekOnePoints[0]?.scanMode).toBe("default-branch-as-of-recorded-at");
     expect(weekOnePoints[0]?.blended.vsPinnedBaseline).not.toBeNull();
 
     const slopHeavyWeekOne = weekOnePoints.find((point) => point.repoId === "slop-heavy");
@@ -151,18 +152,43 @@ describe("benchmark history support", () => {
     expect(mixedWeekOne).toBeTruthy();
     expect(mixedWeekTwo).toBeTruthy();
 
+    const adjustedSlopHeavyWeekTwo = {
+      ...slopHeavyWeekTwo!,
+      blended: {
+        ...slopHeavyWeekTwo!.blended,
+        vsCurrentCohort: (slopHeavyWeekTwo!.blended.vsCurrentCohort ?? 0) + 0.4,
+        vsPinnedBaseline: (slopHeavyWeekTwo!.blended.vsPinnedBaseline ?? 0) + 0.6,
+      },
+      summary: {
+        ...slopHeavyWeekTwo!.summary,
+        repoScore: slopHeavyWeekTwo!.summary.repoScore + 2,
+      },
+    };
+    const adjustedMixedWeekTwo = {
+      ...mixedWeekTwo!,
+      blended: {
+        ...mixedWeekTwo!.blended,
+        vsCurrentCohort: (mixedWeekTwo!.blended.vsCurrentCohort ?? 0) - 0.2,
+        vsPinnedBaseline: (mixedWeekTwo!.blended.vsPinnedBaseline ?? 0) - 0.3,
+      },
+      summary: {
+        ...mixedWeekTwo!.summary,
+        repoScore: mixedWeekTwo!.summary.repoScore - 1,
+      },
+    };
+
     let slopHeavyHistory = mergeHistoryPoint([], slopHeavyWeekOne!);
     slopHeavyHistory = mergeHistoryPoint(slopHeavyHistory, {
       ...slopHeavyWeekOne!,
       recordedAt: "2026-04-15T18:00:00Z",
     });
-    slopHeavyHistory = mergeHistoryPoint(slopHeavyHistory, slopHeavyWeekTwo!);
+    slopHeavyHistory = mergeHistoryPoint(slopHeavyHistory, adjustedSlopHeavyWeekTwo);
 
     let mixedHistory = mergeHistoryPoint([], mixedWeekOne!);
-    mixedHistory = mergeHistoryPoint(mixedHistory, mixedWeekTwo!);
+    mixedHistory = mergeHistoryPoint(mixedHistory, adjustedMixedWeekTwo);
 
     expect(slopHeavyHistory).toHaveLength(2);
-    expect(slopHeavyHistory[0]?.recordedAt).toBe("2026-04-15T12:00:00Z");
+    expect(slopHeavyHistory[0]?.recordedAt).toBe("2026-04-15T18:00:00Z");
 
     const serialized = serializeHistoryPoints(slopHeavyHistory);
     const reparsed = parseHistoryPoints(serialized);
@@ -179,11 +205,20 @@ describe("benchmark history support", () => {
 
     expect(summary.repos).toHaveLength(2);
     expect(summary.repos.every((repo) => repo.pointCount === 2)).toBe(true);
-    expect(summary.repos.every((repo) => repo.deltaFromPrevious?.repoScore === 0)).toBe(true);
+    expect(summary.repos.every((repo) => repo.series.length === 2)).toBe(true);
+    expect(
+      summary.repos.find((repo) => repo.id === "slop-heavy")?.deltaFromPrevious?.repoScore,
+    ).toBe(2);
+    expect(summary.repos.find((repo) => repo.id === "mixed")?.deltaFromPrevious?.repoScore).toBe(
+      -1,
+    );
     expect(summary.generatedAt).toBe("2026-04-22T12:00:00Z");
     expect(summary.baseline.snapshotPath).toBe("benchmarks/results/fixture-benchmark.json");
     expect(report).toContain("Rolling benchmark history: Fixture benchmark");
-    expect(report).toContain("bun run benchmark:history");
+    expect(report).toContain("bun run benchmark:history --recorded-at 2026-04-06T12:00:00Z");
+    expect(report).toContain("Trend (pinned)");
+    expect(report).toContain("▁█");
+    expect(report).toContain("█▁");
     expect(report).toContain("fixtures/slop-heavy");
     expect(report).toContain("fixtures/mixed");
   });

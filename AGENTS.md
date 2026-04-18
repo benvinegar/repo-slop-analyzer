@@ -44,7 +44,7 @@ The repo now has **two benchmark modes**:
    - manifest: `benchmarks/sets/known-ai-vs-solid-oss.json`
    - snapshot: `benchmarks/results/known-ai-vs-solid-oss.json`
    - report: `reports/known-ai-vs-solid-oss-benchmark.md`
-2. **Rolling history** for latest-default-branch trend tracking
+2. **Rolling history** for default-branch-over-time trend tracking
    - runner: `scripts/benchmark-history.ts`
    - history logic: `src/benchmarks/history.ts`
    - latest-ref parsing: `src/benchmarks/latest-ref.ts`
@@ -55,11 +55,14 @@ The repo now has **two benchmark modes**:
 
 Rolling-history flow:
 
-- resolve each repo's latest default-branch SHA with `git ls-remote --symref <url> HEAD`
-- checkout that SHA into `benchmarks/.cache/checkouts-history/<set-id>/`
+- resolve each repo's current default branch with `git ls-remote --symref <url> HEAD`
+- resolve the commit that existed on that branch at the run's `recordedAt` timestamp
+- checkout that commit into `benchmarks/.cache/checkouts-history/<set-id>/`
 - analyze with the default registry and default config
 - write one history point per repo per **UTC week**
 - replace the same week's point on rerun instead of appending duplicates
+- use `bun run benchmark:history --recorded-at <iso>` to backfill prior weekly points honestly
+- backfills may skip newer repos for older weeks if the repo had no commit on its current default branch yet
 - compute two blended scores for each point:
   - `vsCurrentCohort` for same-run relative ranking
   - `vsPinnedBaseline` for cleaner long-term trend lines

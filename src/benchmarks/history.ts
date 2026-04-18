@@ -36,7 +36,7 @@ export interface BenchmarkHistoryPoint {
   repoId: string;
   repo: string;
   cohort: BenchmarkCohort;
-  scanMode: "latest-default-branch";
+  scanMode: "default-branch-as-of-recorded-at";
   defaultBranch: string;
   ref: string;
   analyzerVersion: string;
@@ -47,6 +47,15 @@ export interface BenchmarkHistoryPoint {
     vsPinnedBaseline: number | null;
   };
   ruleCounts: Record<string, number>;
+}
+
+export interface BenchmarkHistorySeriesPoint {
+  periodStart: string;
+  recordedAt: string;
+  blendedVsCurrentCohort: number | null;
+  blendedVsPinnedBaseline: number | null;
+  repoScore: number;
+  findingCount: number;
 }
 
 export interface BenchmarkHistoryDelta {
@@ -75,6 +84,7 @@ export interface BenchmarkHistoryRepoSummary {
   first: BenchmarkHistoryPoint;
   previous: BenchmarkHistoryPoint | null;
   latest: BenchmarkHistoryPoint;
+  series: BenchmarkHistorySeriesPoint[];
   deltaFromFirst: BenchmarkHistoryDelta;
   deltaFromPrevious: BenchmarkHistoryDelta | null;
 }
@@ -320,7 +330,7 @@ export function createBenchmarkHistoryPoints(
         repoId: spec.id,
         repo: spec.repo,
         cohort: spec.cohort,
-        scanMode: "latest-default-branch",
+        scanMode: "default-branch-as-of-recorded-at",
         defaultBranch: resolution.defaultBranch,
         ref: resolution.ref,
         analyzerVersion,
@@ -378,10 +388,7 @@ export function mergeHistoryPoint(
   }
 
   const existingPoint = existingPoints[index];
-  if (
-    existingPoint?.ref === incomingPoint.ref &&
-    existingPoint.analyzerCommit === incomingPoint.analyzerCommit
-  ) {
+  if (existingPoint && JSON.stringify(existingPoint) === JSON.stringify(incomingPoint)) {
     return sortPoints(existingPoints);
   }
 
@@ -430,6 +437,14 @@ export function createBenchmarkHistoryLatestSummary(
         first,
         previous,
         latest,
+        series: sortedPoints.map((point) => ({
+          periodStart: point.periodStart,
+          recordedAt: point.recordedAt,
+          blendedVsCurrentCohort: point.blended.vsCurrentCohort,
+          blendedVsPinnedBaseline: point.blended.vsPinnedBaseline,
+          repoScore: point.summary.repoScore,
+          findingCount: point.summary.findingCount,
+        })),
         deltaFromFirst: buildDelta(latest, first),
         deltaFromPrevious: previous ? buildDelta(latest, previous) : null,
       } satisfies BenchmarkHistoryRepoSummary;
