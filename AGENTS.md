@@ -36,6 +36,37 @@
 - Output formats: `src/reporters/*`
 - Current language scope: `src/languages/javascript-like.ts`
 
+## Rolling benchmark history
+
+The repo now has **two benchmark modes**:
+
+1. **Pinned benchmark** for reproducible claims
+   - manifest: `benchmarks/sets/known-ai-vs-solid-oss.json`
+   - snapshot: `benchmarks/results/known-ai-vs-solid-oss.json`
+   - report: `reports/known-ai-vs-solid-oss-benchmark.md`
+2. **Rolling history** for latest-default-branch trend tracking
+   - runner: `scripts/benchmark-history.ts`
+   - history logic: `src/benchmarks/history.ts`
+   - latest-ref parsing: `src/benchmarks/latest-ref.ts`
+   - report rendering: `src/benchmarks/history-report.ts`
+   - per-repo JSONL: `benchmarks/history/known-ai-vs-solid-oss/*.jsonl`
+   - aggregate summary: `benchmarks/history/known-ai-vs-solid-oss/latest.json`
+   - generated report: `reports/known-ai-vs-solid-oss-history.md`
+
+Rolling-history flow:
+
+- resolve each repo's latest default-branch SHA with `git ls-remote --symref <url> HEAD`
+- checkout that SHA into `benchmarks/.cache/checkouts-history/<set-id>/`
+- analyze with the default registry and default config
+- write one history point per repo per **UTC week**
+- replace the same week's point on rerun instead of appending duplicates
+- compute two blended scores for each point:
+  - `vsCurrentCohort` for same-run relative ranking
+  - `vsPinnedBaseline` for cleaner long-term trend lines
+- regenerate `latest.json` and the markdown history report from the JSONL files
+
+When editing history logic, preserve the separation between pinned and rolling artifacts. Latest-ref scans must not overwrite the pinned snapshot/report used for reproducible benchmark claims.
+
 ## Working rules
 
 - Preserve determinism, stable ordering, and explainable evidence.
@@ -57,7 +88,5 @@
 - Stable self-scan runs the last published package, so newer config features may lag there; use the committed baseline in `tests/fixtures/self-scan-stable-baseline.json` as the source of truth for accepted stable-release behavior.
 - If rule behavior changes, update focused tests and `tests/fixtures-regression.test.ts`.
 - If stable self-scan regressions are intentional, refresh `tests/fixtures/self-scan-stable-baseline.json` with `bun run lint:self:update`.
-- If benchmark-facing behavior changes materially, rerun `bun run benchmark:update` intentionally.
-
-terially, rerun `bun run benchmark:update` intentionally.
-, rerun `bun run benchmark:update` intentionally.
+- If pinned benchmark-facing behavior changes materially, rerun `bun run benchmark:update` intentionally.
+- If rolling benchmark-history behavior changes materially, rerun `bun run benchmark:history` intentionally.

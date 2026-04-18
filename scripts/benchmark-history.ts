@@ -68,6 +68,8 @@ async function writeIfChanged(targetPath: string, content: string): Promise<bool
 }
 
 function resolveLatestRef(spec: BenchmarkRepoSpec): BenchmarkRepoResolution {
+  // Use git itself for default-branch discovery so the history job does not depend on the
+  // GitHub REST API or repository-specific metadata caching.
   const output = run("git", ["ls-remote", "--symref", spec.url, "HEAD"]);
   const parsed = parseLsRemoteDefaultBranch(output);
   return {
@@ -82,6 +84,8 @@ async function prepareCheckout(
   spec: BenchmarkRepoSpec,
   resolution: BenchmarkRepoResolution,
 ): Promise<string> {
+  // History checkouts intentionally live in a separate cache from the pinned benchmark cache so
+  // latest-ref scans cannot disturb the exact-SHA reproducible benchmark workflow.
   const checkoutPath = path.join(checkoutsDir, spec.id);
   const gitPath = path.join(checkoutPath, ".git");
 
@@ -158,6 +162,8 @@ const updatedPointSets = new Map<string, ReturnType<typeof parseHistoryPoints>>(
 let changedFiles = 0;
 
 for (const point of points) {
+  // Each repo keeps a JSONL append log, but the logical unit is one point per UTC week.
+  // `mergeHistoryPoint` makes reruns idempotent by replacing an existing point for that week.
   const historyPath = path.join(historyDir, `${point.repoId}.jsonl`);
   const existingPoints = parseHistoryPoints(await readTextIfExists(historyPath));
   const updatedPoints = mergeHistoryPoint(existingPoints, point);
@@ -169,6 +175,8 @@ for (const point of points) {
 }
 
 const allPoints = [...updatedPointSets.values()].flat();
+// `latest.json` and the markdown report are derived views over the per-repo JSONL files. They make
+// it cheap for docs/UI/reporting code to read current standings without reparsing every file.
 const summary = createBenchmarkHistoryLatestSummary(
   benchmarkSet,
   allPoints,

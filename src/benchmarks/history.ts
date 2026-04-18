@@ -236,6 +236,10 @@ export function resolveBenchmarkHistoryArtifacts(setId: string): BenchmarkHistor
   };
 }
 
+/**
+ * Bucket history points by UTC week so scheduled reruns for the same week overwrite the
+ * existing datapoint instead of endlessly appending near-duplicates.
+ */
 export function getUtcWeekStartDate(input: string | Date): string {
   const date = typeof input === "string" ? new Date(input) : new Date(input.getTime());
 
@@ -271,6 +275,15 @@ export function derivePinnedBaseline(
   };
 }
 
+/**
+ * Build one history point per repo for a scheduled run.
+ *
+ * We intentionally store two blended scores:
+ * - `vsCurrentCohort`: relative to the mature-OSS repos scanned in this same run, which is
+ *   useful for weekly ranking.
+ * - `vsPinnedBaseline`: relative to the frozen pinned benchmark snapshot, which is the cleaner
+ *   time-series for trend charts.
+ */
 export function createBenchmarkHistoryPoints(
   set: BenchmarkSet,
   analyses: BenchmarkedHistoryAnalysis[],
@@ -348,6 +361,10 @@ export function serializeHistoryPoints(points: BenchmarkHistoryPoint[]): string 
   return orderedPoints.map((point) => JSON.stringify(point)).join("\n") + "\n";
 }
 
+/**
+ * Keep at most one datapoint per repo per UTC week.
+ * If a workflow is rerun in the same week, replace that week's point instead of appending.
+ */
 export function mergeHistoryPoint(
   existingPoints: BenchmarkHistoryPoint[],
   incomingPoint: BenchmarkHistoryPoint,
@@ -373,6 +390,11 @@ export function mergeHistoryPoint(
   return sortPoints(updatedPoints);
 }
 
+/**
+ * Summarize the history files by looking only at the latest point for each repo, then attach
+ * deltas versus the previous point and the first point so reports can show short- and long-term
+ * movement without reading every JSONL file downstream.
+ */
 export function createBenchmarkHistoryLatestSummary(
   set: BenchmarkSet,
   allPoints: BenchmarkHistoryPoint[],

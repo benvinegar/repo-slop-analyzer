@@ -3,6 +3,10 @@ export interface LatestDefaultBranchRef {
   ref: string;
 }
 
+/**
+ * Parse `git ls-remote --symref <repo-url> HEAD` output so the rolling-history job can
+ * discover the current default branch and its HEAD SHA without calling the GitHub API.
+ */
 export function parseLsRemoteDefaultBranch(output: string): LatestDefaultBranchRef {
   const lines = output
     .split(/\r?\n/)
