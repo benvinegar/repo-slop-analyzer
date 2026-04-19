@@ -16,29 +16,29 @@ Signal score = average AUROC across the six normalized metrics when each rule ru
 
 | Rank | Rule | Signal score | AI hit rate | OSS hit rate | Best metric | Best AUROC |
 |---:|---|---:|---:|---:|---|---:|
-| 1 | `defensive.promise-default-fallbacks` | **0.97** | 9/9 (100%) | 5/9 (56%) | score / function | 0.99 |
+| 1 | `defensive.promise-default-fallbacks` | **0.98** | 9/9 (100%) | 4/9 (44%) | findings / file | 0.99 |
 
 
 ## defensive.promise-default-fallbacks
 
 - Rank: **#1** of 1
-- Signal score: **0.97 / 1.00**
+- Signal score: **0.98 / 1.00**
 - Family / severity / scope: `defensive` / `strong` / `file`
-- Best metric: score / function (0.99)
+- Best metric: findings / file (0.99)
 
 ### Cohort summary
 
 | Cohort | Hit rate | Median findings | Median repo score | Median score / file | Median score / KLOC | Median findings / KLOC |
 |---|---:|---:|---:|---:|---:|---:|
 | explicit-ai | 9/9 (100%) | 3.00 | 10.00 | 0.11 | 1.18 | 0.32 |
-| mature-oss | 5/9 (56%) | 1.00 | 2.00 | 0.00 | 0.02 | 0.01 |
+| mature-oss | 4/9 (44%) | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
 
 ### AUROC by normalized metric
 
-- score / file: 0.95
+- score / file: 0.99
 - score / KLOC: 0.98
 - score / function: 0.99
-- findings / file: 0.96
+- findings / file: 0.99
 - findings / KLOC: 0.95
 - findings / function: 0.98
 
@@ -57,10 +57,10 @@ Signal score = average AUROC across the six normalized metrics when each rule ru
 | [FullAgent/fulling](https://github.com/FullAgent/fulling) | explicit-ai | `d95060f` | 1 | 2.00 | 0.01 | 0.16 | 0.08 |
 | [withastro/astro](https://github.com/withastro/astro) | mature-oss | `f706899` | 9 | 20.50 | 0.01 | 0.25 | 0.11 |
 | [vitejs/vite](https://github.com/vitejs/vite) | mature-oss | `a492253` | 3 | 6.00 | 0.00 | 0.16 | 0.08 |
-| [vercel/hyper](https://github.com/vercel/hyper) | mature-oss | `2a7bb18` | 1 | 8.00 | 0.07 | 0.12 | 0.02 |
 | [sindresorhus/execa](https://github.com/sindresorhus/execa) | mature-oss | `99d1741` | 1 | 2.00 | 0.00 | 0.10 | 0.05 |
 | [payloadcms/payload](https://github.com/payloadcms/payload) | mature-oss | `f3f36d8` | 3 | 6.00 | 0.00 | 0.02 | 0.01 |
 | [egoist/tsup](https://github.com/egoist/tsup) | mature-oss | `cd03e1e` | 0 | 0.00 | 0.00 | 0.00 | 0.00 |
 | [mikaelbr/node-notifier](https://github.com/mikaelbr/node-notifier) | mature-oss | `b36c237` | 0 | 0.00 | 0.00 | 0.00 | 0.00 |
 | [pmndrs/zustand](https://github.com/pmndrs/zustand) | mature-oss | `2e6d881` | 0 | 0.00 | 0.00 | 0.00 | 0.00 |
 | [umami-software/umami](https://github.com/umami-software/umami) | mature-oss | `227b255` | 0 | 0.00 | 0.00 | 0.00 | 0.00 |
+| [vercel/hyper](https://github.com/vercel/hyper) | mature-oss | `2a7bb18` | 0 | 0.00 | 0.00 | 0.00 | 0.00 |

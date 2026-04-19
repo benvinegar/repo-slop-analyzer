@@ -98,4 +98,20 @@ describe("promise-default-fallbacks rule", () => {
     ]);
     expect(result.findings).toHaveLength(1);
   });
+
+  test("ignores giant bundled files that would otherwise create vendor noise", async () => {
+    const hugeFile = [
+      ...Array.from({ length: 5001 }, (_, index) => `export const filler${index} = ${index};`),
+      "Promise.resolve('x').catch(() => {});",
+      "",
+    ].join("\n");
+
+    const rootDir = await createTempRepo({
+      "src/bundle.ts": hugeFile,
+    });
+
+    const result = await analyzeRepository(rootDir, DEFAULT_CONFIG, createCandidateRegistry());
+
+    expect(result.findings).toHaveLength(0);
+  });
 });

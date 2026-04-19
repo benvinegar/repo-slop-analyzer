@@ -18,6 +18,8 @@ import {
 } from "../../facts/ts-helpers";
 import { delta } from "../../rule-delta";
 
+const MAX_LOGICAL_LINES = 5000;
+
 type PromiseDefaultFallbackMatch = {
   line: number;
   kind: "default-return" | "empty-handler" | "log+default";
@@ -118,6 +120,12 @@ export const promiseDefaultFallbacksRule: RulePlugin = {
     return context.scope === "file" && Boolean(context.file);
   },
   evaluate(context) {
+    // Huge bundled/generated files are noisy outliers for this heuristic and can
+    // otherwise let one vendored blob dominate a repo-level signal.
+    if (context.file!.logicalLineCount > MAX_LOGICAL_LINES) {
+      return [];
+    }
+
     const sourceFile = context.runtime.store.getFileFact<ts.SourceFile>(
       context.file!.path,
       "file.ast",
