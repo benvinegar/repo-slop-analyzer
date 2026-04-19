@@ -41,7 +41,7 @@ bun run benchmark:history --recorded-at 2026-04-06T12:00:00Z
 | [jiayun/DevWorkbench](https://github.com/jiayun/DevWorkbench) | 4 | ██▁▁ | `main@ea50862` | **3.26** | **3.39** | **3.40** | 0.00 | -0.02 | 1.00 | 0.44 |
 | [robinebers/openusage](https://github.com/robinebers/openusage) | 4 | █▂▁▂ | `main@06113d6` | **2.91** | **3.03** | **3.06** | +0.01 | -0.03 | 1.37 | 0.35 |
 | [openclaw/openclaw](https://github.com/openclaw/openclaw) | 4 | ▁▁█▁ | `main@1de5610` | **2.81** | **2.92** | **3.15** | -0.23 | -0.01 | 0.99 | 0.31 |
-| [FullAgent/fulling](https://github.com/FullAgent/fulling) | 4 | ██▁▁ | `main@d95060f` | **2.07** | **2.16** | **2.16** | 0.00 | -0.00 | 0.53 | 0.16 |
+| [FullAgent/fulling](https://github.com/FullAgent/fulling) | 4 | ██▁▁ | `main@d95060f` | **2.07** | **2.16** | **2.16** | 0.00 | 0.00 | 0.53 | 0.16 |
 | [emdash-cms/emdash](https://github.com/emdash-cms/emdash) | 2 | █▁ | `main@a1dac00` | **1.94** | **2.01** | **2.17** | -0.16 | -0.16 | 0.70 | 0.21 |
 | [cloudflare/vinext](https://github.com/cloudflare/vinext) | 4 | ▇█▇▁ | `main@e81a621` | **1.85** | **1.93** | **1.99** | -0.06 | -0.06 | 0.47 | 0.14 |
 | [modem-dev/hunk](https://github.com/modem-dev/hunk) | 4 | ▁▄▄█ | `main@53242b4` | **1.46** | **1.51** | **1.51** | +0.44 | +0.71 | 0.48 | 0.17 |
@@ -50,11 +50,11 @@ bun run benchmark:history --recorded-at 2026-04-06T12:00:00Z
 
 | Repo | Points | Trend (pinned) | Latest ref | Current blended | Latest pinned | Highest pinned | Δ prev (pinned) | Δ first (pinned) | Score/file | Findings/file |
 |---|---:|---|---|---:|---:|---:|---:|---:|---:|---:|
-| [vitejs/vite](https://github.com/vitejs/vite) | 4 | █▆▁▇ | `main@bc5c6a7` | **1.46** | **1.52** | **1.52** | +0.02 | -0.00 | 0.27 | 0.08 |
-| [withastro/astro](https://github.com/withastro/astro) | 4 | █▂▁▁ | `main@7fe40bc` | **1.40** | **1.46** | **1.55** | -0.00 | -0.09 | 0.27 | 0.09 |
+| [vitejs/vite](https://github.com/vitejs/vite) | 4 | █▆▁▇ | `main@bc5c6a7` | **1.46** | **1.52** | **1.52** | +0.02 | 0.00 | 0.27 | 0.08 |
+| [withastro/astro](https://github.com/withastro/astro) | 4 | █▂▁▁ | `main@7fe40bc` | **1.40** | **1.46** | **1.55** | 0.00 | -0.09 | 0.27 | 0.09 |
 | [pmndrs/zustand](https://github.com/pmndrs/zustand) | 4 | ██▁▁ | `main@00f96a3` | **1.33** | **1.38** | **1.38** | 0.00 | -0.01 | 0.47 | 0.18 |
 | [payloadcms/payload](https://github.com/payloadcms/payload) | 4 | ▁▂▃█ | `main@5afcef5` | **1.29** | **1.34** | **1.34** | +0.02 | +0.02 | 0.24 | 0.08 |
-| [umami-software/umami](https://github.com/umami-software/umami) | 4 | █▁▁▂ | `master@3a31ad3` | **1.00** | **1.04** | **1.04** | +0.00 | -0.00 | 0.18 | 0.07 |
+| [umami-software/umami](https://github.com/umami-software/umami) | 4 | █▁▁▂ | `master@3a31ad3` | **1.00** | **1.04** | **1.04** | +0.00 | 0.00 | 0.18 | 0.07 |
 | [egoist/tsup](https://github.com/egoist/tsup) | 4 | ▅▅▅▅ | `main@b906f86` | **0.89** | **0.92** | **0.92** | 0.00 | 0.00 | 0.21 | 0.08 |
 | [sindresorhus/execa](https://github.com/sindresorhus/execa) | 4 | ▅▅▅▅ | `main@f3a2e84` | **0.85** | **0.89** | **0.89** | 0.00 | 0.00 | 0.17 | 0.05 |
 | [mikaelbr/node-notifier](https://github.com/mikaelbr/node-notifier) | 4 | ▅▅▅▅ | `master@b36c237` | **0.40** | **0.41** | **0.41** | 0.00 | 0.00 | 0.08 | 0.04 |
@@ -74,7 +74,7 @@ bun run benchmark:history --recorded-at 2026-04-06T12:00:00Z
 - [openclaw/openclaw](https://github.com/openclaw/openclaw) — -0.23 vs previous week (pinned blended)
 - [emdash-cms/emdash](https://github.com/emdash-cms/emdash) — -0.16 vs previous week (pinned blended)
 - [cloudflare/vinext](https://github.com/cloudflare/vinext) — -0.06 vs previous week (pinned blended)
-- [withastro/astro](https://github.com/withastro/astro) — -0.00 vs previous week (pinned blended)
+- [withastro/astro](https://github.com/withastro/astro) — 0.00 vs previous week (pinned blended)
 
 ## Notes
 

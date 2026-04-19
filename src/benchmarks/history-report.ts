@@ -17,7 +17,8 @@ function formatSigned(value: number | null, digits = 2): string {
   }
 
   const rounded = value.toFixed(digits);
-  return value > 0 ? `+${rounded}` : rounded;
+  const normalized = rounded === `-0.${"0".repeat(digits)}` ? `0.${"0".repeat(digits)}` : rounded;
+  return value > 0 ? `+${normalized}` : normalized;
 }
 
 function shortRef(ref: string): string {

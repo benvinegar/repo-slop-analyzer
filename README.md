@@ -174,36 +174,42 @@ _Why before Jan 1, 2025?_ Because this cutoff aims to catch mature OSS before AI
 | Findings / KLOC     |  **2.96** |          **1.38** | **2.14x** |
 | Findings / function |  **0.08** |          **0.04** | **2.21x** |
 
-### Pinned benchmark snapshot
+### Rolling benchmark snapshot
 
-Ordered by blended score.
+Latest default-branch history, still normalized against the frozen pinned baseline. Ordered by latest pinned score.
 
-| Repository                                                            | Cohort     | Ref       |  Blended | Score/file | Score/KLOC | Findings/file | Findings/KLOC |
-| --------------------------------------------------------------------- | ---------- | --------- | -------: | ---------: | ---------: | ------------: | ------------: |
-| [`garrytan/gstack`](https://github.com/garrytan/gstack)               | ai         | `6cc094c` | **5.33** |       2.34 |      21.71 |          0.52 |          4.85 |
-| [`redwoodjs/agent-ci`](https://github.com/redwoodjs/agent-ci)         | ai         | `4de00d6` | **3.57** |       0.99 |      10.95 |          0.31 |          3.42 |
-| [`jiayun/DevWorkbench`](https://github.com/jiayun/DevWorkbench)       | ai         | `ea50862` | **3.39** |       1.00 |      10.76 |          0.44 |          4.69 |
-| [`openclaw/openclaw`](https://github.com/openclaw/openclaw)           | ai         | `44cf747` | **3.06** |       1.04 |      10.60 |          0.32 |          3.22 |
-| [`robinebers/openusage`](https://github.com/robinebers/openusage)     | ai         | `857f537` | **3.02** |       1.27 |       7.92 |          0.33 |          2.07 |
-| [`emdash-cms/emdash`](https://github.com/emdash-cms/emdash)           | ai         | `dbaf8c6` | **2.17** |       0.73 |       6.54 |          0.22 |          1.98 |
-| [`FullAgent/fulling`](https://github.com/FullAgent/fulling)           | ai         | `d95060f` | **2.16** |       0.53 |       9.51 |          0.16 |          2.96 |
-| [`cloudflare/vinext`](https://github.com/cloudflare/vinext)           | ai         | `28980b0` | **1.99** |       0.48 |       9.20 |          0.15 |          2.76 |
-| [`withastro/astro`](https://github.com/withastro/astro)               | mature-oss | `f706899` | **1.58** |       0.28 |       6.75 |          0.10 |          2.31 |
-| [`payloadcms/payload`](https://github.com/payloadcms/payload)         | mature-oss | `f3f36d8` | **1.47** |       0.24 |       4.04 |          0.08 |          1.38 |
-| [`vitejs/vite`](https://github.com/vitejs/vite)                       | mature-oss | `a492253` | **1.47** |       0.25 |       8.19 |          0.08 |          2.52 |
-| [`pmndrs/zustand`](https://github.com/pmndrs/zustand)                 | mature-oss | `2e6d881` | **1.45** |       0.47 |       3.20 |          0.19 |          1.27 |
-| [`modem-dev/hunk`](https://github.com/modem-dev/hunk)                 | ai         | `b37663f` | **1.18** |       0.38 |       4.71 |          0.13 |          1.55 |
-| [`umami-software/umami`](https://github.com/umami-software/umami)     | mature-oss | `227b255` | **1.00** |       0.17 |       4.36 |          0.07 |          1.66 |
-| [`egoist/tsup`](https://github.com/egoist/tsup)                       | mature-oss | `cd03e1e` | **0.95** |       0.22 |       3.83 |          0.09 |          1.50 |
-| [`sindresorhus/execa`](https://github.com/sindresorhus/execa)         | mature-oss | `99d1741` | **0.89** |       0.17 |       4.86 |          0.05 |          1.37 |
-| [`mikaelbr/node-notifier`](https://github.com/mikaelbr/node-notifier) | mature-oss | `b36c237` | **0.41** |       0.08 |       0.90 |          0.04 |          0.47 |
-| [`vercel/hyper`](https://github.com/vercel/hyper)                     | mature-oss | `2a7bb18` | **0.41** |       0.65 |       1.12 |          0.16 |          0.28 |
+| Repository                                                            | Cohort     | Latest ref       | Current blended | Latest pinned | Highest pinned | Δ prev | Δ peak |
+| --------------------------------------------------------------------- | ---------- | ---------------- | --------------: | ------------: | -------------: | -----: | -----: |
+| [`garrytan/gstack`](https://github.com/garrytan/gstack)               | ai         | `main@c6e6a21`   |        **4.59** |      **4.77** |       **6.37** |  -0.64 |  -1.60 |
+| [`redwoodjs/agent-ci`](https://github.com/redwoodjs/agent-ci)         | ai         | `main@c61f27d`   |        **3.76** |      **3.91** |       **3.91** |  +0.51 |   0.00 |
+| [`jiayun/DevWorkbench`](https://github.com/jiayun/DevWorkbench)       | ai         | `main@ea50862`   |        **3.26** |      **3.39** |       **3.40** |   0.00 |  -0.02 |
+| [`robinebers/openusage`](https://github.com/robinebers/openusage)     | ai         | `main@06113d6`   |        **2.91** |      **3.03** |       **3.06** |  +0.01 |  -0.03 |
+| [`openclaw/openclaw`](https://github.com/openclaw/openclaw)           | ai         | `main@1de5610`   |        **2.81** |      **2.92** |       **3.15** |  -0.23 |  -0.23 |
+| [`FullAgent/fulling`](https://github.com/FullAgent/fulling)           | ai         | `main@d95060f`   |        **2.07** |      **2.16** |       **2.16** |   0.00 |   0.00 |
+| [`emdash-cms/emdash`](https://github.com/emdash-cms/emdash)           | ai         | `main@a1dac00`   |        **1.94** |      **2.01** |       **2.17** |  -0.16 |  -0.16 |
+| [`cloudflare/vinext`](https://github.com/cloudflare/vinext)           | ai         | `main@e81a621`   |        **1.85** |      **1.93** |       **1.99** |  -0.06 |  -0.07 |
+| [`vitejs/vite`](https://github.com/vitejs/vite)                       | mature-oss | `main@bc5c6a7`   |        **1.46** |      **1.52** |       **1.52** |  +0.02 |   0.00 |
+| [`modem-dev/hunk`](https://github.com/modem-dev/hunk)                 | ai         | `main@53242b4`   |        **1.46** |      **1.51** |       **1.51** |  +0.44 |   0.00 |
+| [`withastro/astro`](https://github.com/withastro/astro)               | mature-oss | `main@7fe40bc`   |        **1.40** |      **1.46** |       **1.55** |   0.00 |  -0.09 |
+| [`pmndrs/zustand`](https://github.com/pmndrs/zustand)                 | mature-oss | `main@00f96a3`   |        **1.33** |      **1.38** |       **1.38** |   0.00 |  -0.01 |
+| [`payloadcms/payload`](https://github.com/payloadcms/payload)         | mature-oss | `main@5afcef5`   |        **1.29** |      **1.34** |       **1.34** |  +0.02 |   0.00 |
+| [`umami-software/umami`](https://github.com/umami-software/umami)     | mature-oss | `master@3a31ad3` |        **1.00** |      **1.04** |       **1.04** |  +0.00 |   0.00 |
+| [`egoist/tsup`](https://github.com/egoist/tsup)                       | mature-oss | `main@b906f86`   |        **0.89** |      **0.92** |       **0.92** |   0.00 |   0.00 |
+| [`sindresorhus/execa`](https://github.com/sindresorhus/execa)         | mature-oss | `main@f3a2e84`   |        **0.85** |      **0.89** |       **0.89** |   0.00 |   0.00 |
+| [`mikaelbr/node-notifier`](https://github.com/mikaelbr/node-notifier) | mature-oss | `master@b36c237` |        **0.40** |      **0.41** |       **0.41** |   0.00 |   0.00 |
+| [`vercel/hyper`](https://github.com/vercel/hyper)                     | mature-oss | `canary@2a7bb18` |        **0.40** |      **0.41** |       **0.41** |   0.00 |   0.00 |
+
+`Δ peak` = latest pinned - highest pinned, so more negative means a repo is below its own historical high.
+
+For exact pinned SHAs and the full per-metric breakdowns, see the saved snapshot and pinned benchmark report.
 
 Full benchmark assets:
 
 - manifest: [`benchmarks/sets/known-ai-vs-solid-oss.json`](benchmarks/sets/known-ai-vs-solid-oss.json)
-- snapshot: [`benchmarks/results/known-ai-vs-solid-oss.json`](benchmarks/results/known-ai-vs-solid-oss.json)
-- report: [`reports/known-ai-vs-solid-oss-benchmark.md`](reports/known-ai-vs-solid-oss-benchmark.md)
+- pinned snapshot: [`benchmarks/results/known-ai-vs-solid-oss.json`](benchmarks/results/known-ai-vs-solid-oss.json)
+- pinned report: [`reports/known-ai-vs-solid-oss-benchmark.md`](reports/known-ai-vs-solid-oss-benchmark.md)
+- rolling latest summary: [`benchmarks/history/known-ai-vs-solid-oss/latest.json`](benchmarks/history/known-ai-vs-solid-oss/latest.json)
+- rolling history report: [`reports/known-ai-vs-solid-oss-history.md`](reports/known-ai-vs-solid-oss-history.md)
 
 ## Configuration
 
