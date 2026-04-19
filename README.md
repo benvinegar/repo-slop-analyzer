@@ -290,6 +290,18 @@ Issues and pull requests are welcome.
 
 For local development, validation, and benchmark reproduction, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Sponsor
+
+Sponsored by [Modem](https://modem.dev?utm_source=github&utm_medium=oss&utm_campaign=slop-scan).
+
+<a href="https://modem.dev?utm_source=github&utm_medium=oss&utm_campaign=slop-scan">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://modem.dev/images/logo/svg/modem-combined-white.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://modem.dev/images/logo/svg/modem-combined-black.svg">
+    <img src="https://modem.dev/images/logo/svg/modem-combined-black.svg" alt="Modem" width="220">
+  </picture>
+</a>
+
 ## License
 
 MIT
