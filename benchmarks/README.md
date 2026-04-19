@@ -53,13 +53,45 @@ Or do all three:
 bun run benchmark:update
 ```
 
+## Rolling history
+
+A separate rolling-history pipeline tracks the same repos at the **default-branch revision that existed at each recorded run time**.
+
+Refresh it locally with:
+
+```bash
+bun run benchmark:history
+```
+
+Backfill an earlier weekly point with:
+
+```bash
+bun run benchmark:history --recorded-at 2026-04-06T12:00:00Z
+```
+
+That writes:
+
+- per-repo JSONL histories under `benchmarks/history/known-ai-vs-solid-oss/*.jsonl`
+- a latest aggregate summary at `benchmarks/history/known-ai-vs-solid-oss/latest.json`
+- a generated markdown summary at `reports/known-ai-vs-solid-oss-history.md`
+
+If a repo did not exist yet for an older backfill date, that weekly point is skipped instead of fabricating a datapoint.
+
+The rolling history is intentionally separate from the pinned benchmark snapshot so reproducible benchmark claims still point at exact SHAs.
+
 ## Artifacts
 
-For the current set:
+For the current pinned set:
 
 - manifest: `benchmarks/sets/known-ai-vs-solid-oss.json`
 - saved snapshot: `benchmarks/results/known-ai-vs-solid-oss.json`
 - generated report: `reports/known-ai-vs-solid-oss-benchmark.md`
+
+For rolling history:
+
+- per-repo JSONL: `benchmarks/history/known-ai-vs-solid-oss/*.jsonl`
+- latest summary: `benchmarks/history/known-ai-vs-solid-oss/latest.json`
+- generated history report: `reports/known-ai-vs-solid-oss-history.md`
 
 ## Notes
 
