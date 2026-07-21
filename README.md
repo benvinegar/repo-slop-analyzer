@@ -69,6 +69,12 @@ Use `--lint` when you want human-readable findings in local runs, CI logs, or PR
 slop-scan scan . --lint
 ```
 
+Add `--fail-on-findings` to exit non-zero when the scan reports findings:
+
+```bash
+slop-scan scan . --lint --fail-on-findings
+```
+
 Example output:
 
 ```text
@@ -86,13 +92,7 @@ Use `--json` when you want full-fidelity output for scripts, CI, or post-process
 slop-scan scan . --json
 ```
 
-Example CI check:
-
-```bash
-slop-scan scan . --json | jq -e '.summary.findingCount == 0'
-```
-
-The CLI currently exits non-zero for CLI/runtime errors, not for findings.
+By default, the CLI exits non-zero for CLI/runtime errors, not for findings.
 
 ## Delta comparisons
 
