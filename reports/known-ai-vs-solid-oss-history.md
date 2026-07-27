@@ -1,6 +1,6 @@
 # Rolling benchmark history: Known AI repos vs older solid OSS repos
 
-Latest update: 2026-07-20
+Latest update: 2026-07-27
 History dir: `benchmarks/history/known-ai-vs-solid-oss/`
 Pinned baseline snapshot: `benchmarks/results/known-ai-vs-solid-oss.json` (2026-04-26)
 Pinned baseline analyzer version: 0.3.0
@@ -23,42 +23,42 @@ bun run benchmark:history --recorded-at 2026-04-06T12:00:00Z
 
 ## Latest analyzer revisions
 
-- `0.4.0` @ `e360ce3` — 18 latest repo snapshots
+- `0.4.0` @ `126283b` — 18 latest repo snapshots
 
 ## Latest cohort medians
 
 | Cohort | Repo count | Median current blended | Median score/file | Median findings/file |
 |---|---:|---:|---:|---:|
-| explicit-ai | 9 | **5.03** | 1.13 | 0.32 |
+| explicit-ai | 9 | **5.04** | 1.15 | 0.32 |
 | mature-oss | 9 | **1.00** | 0.15 | 0.05 |
 
 ## AI cohort latest standings
 
 | Repo | Points | Trend (pinned) | Latest ref | Current blended | Latest pinned | Highest pinned | Δ prev (pinned) | Δ first (pinned) | Score/file | Findings/file |
 |---|---:|---|---|---:|---:|---:|---:|---:|---:|---:|
-| [garrytan/gstack](https://github.com/garrytan/gstack) | 18 | ▄▃█▂▂▂▄▁ | `main@a325940` | **8.54** | **11.07** | **11.92** | -0.03 | +4.70 | 1.65 | 0.45 |
-| [redwoodjs/agent-ci](https://github.com/redwoodjs/agent-ci) | 18 | ▁▁▁▁▁▁▃█ | `main@aa1802a` | **7.03** | **9.11** | **9.62** | +0.08 | +5.21 | 1.34 | 0.40 |
-| [jiayun/DevWorkbench](https://github.com/jiayun/DevWorkbench) | 18 | ▅▅▅▅▅▅▅▅ | `main@27f0d1a` | **6.94** | **8.99** | **8.99** | 0.00 | +5.59 | 1.26 | 0.47 |
-| [openclaw/openclaw](https://github.com/openclaw/openclaw) | 18 | ▁▂▁▆▅▆▄█ | `main@756de70` | **5.48** | **7.10** | **7.10** | +0.07 | +4.17 | 1.34 | 0.38 |
-| [emdash-cms/emdash](https://github.com/emdash-cms/emdash) | 16 | ▁▁▂▄▅▆▆█ | `main@a27a5cc` | **4.58** | **5.94** | **5.94** | +0.15 | +3.76 | 1.01 | 0.27 |
-| [cloudflare/vinext](https://github.com/cloudflare/vinext) | 18 | ▃▇█▅▁▇▇▃ | `main@03e8ac6` | **3.06** | **3.97** | **4.11** | -0.10 | +1.98 | 0.51 | 0.15 |
-| [modem-dev/hunk](https://github.com/modem-dev/hunk) | 18 | ▆█▆▆▆▆▆▁ | `main@53fcb2c` | **2.22** | **2.88** | **3.59** | -0.44 | +2.08 | 0.40 | 0.15 |
-| [FullAgent/fulling](https://github.com/FullAgent/fulling) | 18 | ██████▁▁ | `main@317c014` | **2.04** | **2.64** | **10.28** | +0.44 | +0.48 | 0.20 | 0.05 |
-| [robinebers/openusage](https://github.com/robinebers/openusage) | 18 | ▆▁██···· | `main@9d2bf09` | **n/a** | **n/a** | **6.56** | n/a | n/a | n/a | n/a |
+| [garrytan/gstack](https://github.com/garrytan/gstack) | 19 | ▃█▂▂▂▄▁▁ | `main@a325940` | **8.45** | **11.07** | **11.92** | 0.00 | +4.70 | 1.65 | 0.45 |
+| [redwoodjs/agent-ci](https://github.com/redwoodjs/agent-ci) | 19 | ▁▁▁▁▁▃██ | `main@aa1802a` | **6.96** | **9.11** | **9.62** | 0.00 | +5.21 | 1.34 | 0.40 |
+| [jiayun/DevWorkbench](https://github.com/jiayun/DevWorkbench) | 19 | ▅▅▅▅▅▅▅▅ | `main@27f0d1a` | **6.86** | **8.99** | **8.99** | 0.00 | +5.59 | 1.26 | 0.47 |
+| [openclaw/openclaw](https://github.com/openclaw/openclaw) | 19 | ▂▁▆▅▆▄█▅ | `main@ba1127f` | **5.37** | **7.03** | **7.10** | -0.06 | +4.10 | 1.31 | 0.37 |
+| [emdash-cms/emdash](https://github.com/emdash-cms/emdash) | 17 | ▁▂▃▄▄▅▆█ | `main@6470071` | **4.71** | **6.17** | **6.17** | +0.23 | +4.00 | 1.05 | 0.28 |
+| [cloudflare/vinext](https://github.com/cloudflare/vinext) | 19 | ▇█▅▁▇▇▃▁ | `main@3570928` | **3.00** | **3.93** | **4.11** | -0.04 | +1.94 | 0.49 | 0.14 |
+| [modem-dev/hunk](https://github.com/modem-dev/hunk) | 19 | █▆▆▆▆▆▁▁ | `main@37950b8` | **2.23** | **2.92** | **3.59** | +0.04 | +2.11 | 0.39 | 0.16 |
+| [FullAgent/fulling](https://github.com/FullAgent/fulling) | 19 | █████▁▁▁ | `main@f48efce` | **2.02** | **2.64** | **10.28** | 0.00 | +0.48 | 0.20 | 0.05 |
+| [robinebers/openusage](https://github.com/robinebers/openusage) | 19 | ▁██····· | `main@9d2bf09` | **n/a** | **n/a** | **6.56** | n/a | n/a | n/a | n/a |
 
 ## Mature OSS cohort latest standings
 
 | Repo | Points | Trend (pinned) | Latest ref | Current blended | Latest pinned | Highest pinned | Δ prev (pinned) | Δ first (pinned) | Score/file | Findings/file |
 |---|---:|---|---|---:|---:|---:|---:|---:|---:|---:|
-| [withastro/astro](https://github.com/withastro/astro) | 18 | ▁▁▆▆▇▇▆█ | `main@8a7f7e0` | **1.77** | **2.30** | **2.30** | +0.03 | +0.75 | 0.19 | 0.07 |
-| [vitejs/vite](https://github.com/vitejs/vite) | 18 | ▅█▅▄█▆▅▁ | `main@e16ff3a` | **1.60** | **2.08** | **2.11** | -0.02 | +0.56 | 0.15 | 0.05 |
-| [egoist/tsup](https://github.com/egoist/tsup) | 18 | ▅▅▅▅▅▅▅▅ | `main@b6bcae8` | **1.17** | **1.52** | **1.52** | 0.00 | +0.60 | 0.15 | 0.06 |
-| [pmndrs/zustand](https://github.com/pmndrs/zustand) | 18 | ▅▅▅▅▅▅▅▅ | `main@beca84e` | **1.04** | **1.35** | **1.38** | 0.00 | -0.03 | 0.19 | 0.08 |
-| [payloadcms/payload](https://github.com/payloadcms/payload) | 18 | ▂▁▂▁▁█▆█ | `main@26f61bc` | **1.00** | **1.30** | **1.34** | +0.02 | -0.02 | 0.11 | 0.03 |
-| [umami-software/umami](https://github.com/umami-software/umami) | 18 | ▁▁▁▁████ | `master@af1b6c6` | **0.76** | **0.99** | **1.04** | 0.00 | -0.06 | 0.08 | 0.03 |
-| [sindresorhus/execa](https://github.com/sindresorhus/execa) | 18 | ▂▂▂▂▂█▁▁ | `main@e389369` | **0.76** | **0.98** | **1.10** | 0.00 | +0.09 | 0.09 | 0.02 |
-| [mikaelbr/node-notifier](https://github.com/mikaelbr/node-notifier) | 18 | ▅▅▅▅▅▅▅▅ | `master@b36c237` | **0.73** | **0.95** | **0.95** | 0.00 | +0.53 | 0.08 | 0.04 |
-| [vercel/hyper](https://github.com/vercel/hyper) | 18 | ▅▅▅▅▅▅▅▅ | `canary@da0c401` | **0.70** | **0.90** | **0.90** | 0.00 | +0.49 | 0.63 | 0.15 |
+| [withastro/astro](https://github.com/withastro/astro) | 19 | ▁▆▆▇▇▆█▇ | `main@82bf7e2` | **1.75** | **2.29** | **2.30** | -0.01 | +0.74 | 0.19 | 0.07 |
+| [vitejs/vite](https://github.com/vitejs/vite) | 19 | █▅▄█▆▅▁▁ | `main@4c07b74` | **1.59** | **2.08** | **2.11** | 0.00 | +0.56 | 0.15 | 0.05 |
+| [egoist/tsup](https://github.com/egoist/tsup) | 19 | ▅▅▅▅▅▅▅▅ | `main@b6bcae8` | **1.16** | **1.52** | **1.52** | 0.00 | +0.60 | 0.15 | 0.06 |
+| [pmndrs/zustand](https://github.com/pmndrs/zustand) | 19 | ▅▅▅▅▅▅▅▅ | `main@beca84e` | **1.03** | **1.35** | **1.38** | 0.00 | -0.03 | 0.19 | 0.08 |
+| [payloadcms/payload](https://github.com/payloadcms/payload) | 19 | ▁▂▁▁▇▅▇█ | `main@e60ebcd` | **1.00** | **1.31** | **1.34** | +0.01 | -0.01 | 0.11 | 0.03 |
+| [umami-software/umami](https://github.com/umami-software/umami) | 19 | ▁▁▁█████ | `master@af1b6c6` | **0.75** | **0.99** | **1.04** | 0.00 | -0.06 | 0.08 | 0.03 |
+| [sindresorhus/execa](https://github.com/sindresorhus/execa) | 19 | ▂▂▂▂█▁▁▁ | `main@499fe80` | **0.75** | **0.98** | **1.10** | 0.00 | +0.09 | 0.09 | 0.02 |
+| [mikaelbr/node-notifier](https://github.com/mikaelbr/node-notifier) | 19 | ▅▅▅▅▅▅▅▅ | `master@b36c237` | **0.72** | **0.95** | **0.95** | 0.00 | +0.53 | 0.08 | 0.04 |
+| [vercel/hyper](https://github.com/vercel/hyper) | 19 | ▅▅▅▅▅▅▅▅ | `canary@da0c401` | **0.69** | **0.90** | **0.90** | 0.00 | +0.49 | 0.63 | 0.15 |
 
 ## Table legend
 
@@ -70,19 +70,16 @@ bun run benchmark:history --recorded-at 2026-04-06T12:00:00Z
 
 ## Biggest increases vs previous week
 
-- [FullAgent/fulling](https://github.com/FullAgent/fulling) — +0.44 vs previous week (pinned blended)
-- [emdash-cms/emdash](https://github.com/emdash-cms/emdash) — +0.15 vs previous week (pinned blended)
-- [redwoodjs/agent-ci](https://github.com/redwoodjs/agent-ci) — +0.08 vs previous week (pinned blended)
-- [openclaw/openclaw](https://github.com/openclaw/openclaw) — +0.07 vs previous week (pinned blended)
-- [withastro/astro](https://github.com/withastro/astro) — +0.03 vs previous week (pinned blended)
+- [emdash-cms/emdash](https://github.com/emdash-cms/emdash) — +0.23 vs previous week (pinned blended)
+- [modem-dev/hunk](https://github.com/modem-dev/hunk) — +0.04 vs previous week (pinned blended)
+- [payloadcms/payload](https://github.com/payloadcms/payload) — +0.01 vs previous week (pinned blended)
 
 ## Biggest decreases vs previous week
 
-- [modem-dev/hunk](https://github.com/modem-dev/hunk) — -0.44 vs previous week (pinned blended)
-- [cloudflare/vinext](https://github.com/cloudflare/vinext) — -0.10 vs previous week (pinned blended)
-- [garrytan/gstack](https://github.com/garrytan/gstack) — -0.03 vs previous week (pinned blended)
-- [vitejs/vite](https://github.com/vitejs/vite) — -0.02 vs previous week (pinned blended)
-- [sindresorhus/execa](https://github.com/sindresorhus/execa) — 0.00 vs previous week (pinned blended)
+- [openclaw/openclaw](https://github.com/openclaw/openclaw) — -0.06 vs previous week (pinned blended)
+- [cloudflare/vinext](https://github.com/cloudflare/vinext) — -0.04 vs previous week (pinned blended)
+- [withastro/astro](https://github.com/withastro/astro) — -0.01 vs previous week (pinned blended)
+- [vitejs/vite](https://github.com/vitejs/vite) — 0.00 vs previous week (pinned blended)
 
 ## Notes
 
